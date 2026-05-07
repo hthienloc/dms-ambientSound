@@ -78,7 +78,7 @@ PluginComponent {
         { name: "summer-night", icon: "dark_mode" }
     ]
 
-    Timer {
+Timer {
         id: autoStartTimer
         interval: 2000
         onTriggered: {
@@ -92,15 +92,30 @@ PluginComponent {
             if (pluginData.enableSleepTimer) {
                 var minutes = parseInt(pluginData.sleepTimerDuration) || 30;
                 sleepTimer.interval = minutes * 60 * 1000;
+                sleepTimer.remainingTime = minutes * 60 * 1000;
                 sleepTimer.start();
+            }
+        }
+    }
             }
         }
     }
 
     Timer {
         id: sleepTimer
+        property int remainingTime: 0
         onTriggered: {
             root.stopAll();
+            remainingTime = 0;
+        }
+    }
+    
+    Timer {
+        id: sleepCountdown
+        interval: 1000
+        running: sleepTimer.running
+        onTriggered: {
+            sleepTimer.remainingTime = sleepTimer.remainingTime > 1000 ? sleepTimer.remainingTime - 1000 : 0;
         }
     }
 
@@ -211,6 +226,40 @@ PluginComponent {
                 // Footer
                 Column {
                     width: parent.width; spacing: 4
+                    
+                    // Sleep Timer Row
+                    Row {
+                        width: parent.width; spacing: 8
+                        DankIcon { name: "timer"; size: 18; color: sleepTimer.running ? Theme.primary : Theme.surfaceVariantText; anchors.verticalCenter: parent.verticalCenter }
+                        StyledText { 
+                            text: sleepTimer.running ? Math.ceil(sleepTimer.remainingTime / 60000) + " min left" : "Sleep Timer"; 
+                            font.pixelSize: Theme.fontSizeSmall; 
+                            color: sleepTimer.running ? Theme.primary : Theme.surfaceVariantText
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                        DankButton {
+                            text: "15m"; width: 45; height: 24; fontSize: 10
+                            visible: !sleepTimer.running
+                            onClicked: { sleepTimer.interval = 15 * 60 * 1000; sleepTimer.remainingTime = 15 * 60 * 1000; sleepTimer.start(); }
+                        }
+                        DankButton {
+                            text: "30m"; width: 45; height: 24; fontSize: 10
+                            visible: !sleepTimer.running
+                            onClicked: { sleepTimer.interval = 30 * 60 * 1000; sleepTimer.remainingTime = 30 * 60 * 1000; sleepTimer.start(); }
+                        }
+                        DankButton {
+                            text: "1h"; width: 45; height: 24; fontSize: 10
+                            visible: !sleepTimer.running
+                            onClicked: { sleepTimer.interval = 60 * 60 * 1000; sleepTimer.remainingTime = 60 * 60 * 1000; sleepTimer.start(); }
+                        }
+                        DankButton {
+                            text: "Off"; width: 45; height: 24; fontSize: 10
+                            backgroundColor: Theme.errorContainer; textColor: Theme.error
+                            visible: sleepTimer.running
+                            onClicked: { sleepTimer.stop(); }
+                        }
+                    }
+
                     DankButton {
                         text: "Stop All"; iconName: "stop"; width: parent.width; visible: root.playingSounds.length > 0
                         backgroundColor: Theme.errorContainer; textColor: Theme.error
