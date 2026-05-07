@@ -39,7 +39,7 @@ PluginComponent {
             list.splice(idx, 1);
             playingSounds = list;
             Proc.runCommand("stop-" + sound, ["bash", "-c", killSoundCmd(sound)], null, 0);
-            if (list.length === 0) root.masterVolume = pluginData.defaultVolume ?? 70;
+            if (list.length === 0) root.masterVolume = parseInt(pluginData.defaultVolume) || 75;
         } else {
             list.push(sound);
             playingSounds = list;
@@ -50,7 +50,7 @@ PluginComponent {
     function stopAll() {
         playingSounds = [];
         Proc.runCommand("stop-all", ["bash", "-c", killSoundCmd(".*")], null, 0);
-        root.masterVolume = pluginData.defaultVolume ?? 70;
+        root.masterVolume = parseInt(pluginData.defaultVolume) || 75;
     }
 
     function restartAll() {
@@ -63,7 +63,7 @@ PluginComponent {
     }
 
     property var playingSounds: []
-    property int masterVolume: pluginData.defaultVolume ?? 70
+    property int masterVolume: parseInt(pluginData.defaultVolume) || 75
 
     readonly property var sounds: [
         { name: "rain", icon: "water_drop" },
