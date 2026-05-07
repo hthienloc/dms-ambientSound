@@ -47,7 +47,7 @@ PluginSettings {
                     { label: "75%", value: "75" },
                     { label: "100%", value: "100" }
                 ]
-                defaultValue: "75"
+                defaultValue: "100"
             }
         }
     }

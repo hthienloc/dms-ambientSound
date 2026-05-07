@@ -55,7 +55,7 @@ PluginComponent {
 
     // Audio state
     property var playingSounds: []
-    property int masterVolume: parseInt(pluginData.defaultVolume) || 75
+    property int masterVolume: parseInt(pluginData.defaultVolume) || 100
     property bool isMuted: false
 
     // Helper – mpv commands
