@@ -7,7 +7,7 @@ import qs.Modules.Plugins
 
 PluginSettings {
     id: root
-    pluginId: "ambient-sound"
+    pluginId: "ambientSound"
 
     StyledText {
         width: parent.width
