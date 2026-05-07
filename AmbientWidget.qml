@@ -121,30 +121,24 @@ Timer {
     // --- UI Components ---
 
     horizontalBarPill: Component {
-        DankActionButton {
-            iconName: root.playingSounds.length > 0 ? "" : "music_note"
-            iconSize: Theme.iconSizeSmall
-            backgroundColor: (root.playingSounds.length > 0 || sleepTimer.running) ? Theme.primary : "transparent"
-            
-            MouseArea {
-                anchors.fill: parent
-                acceptedButtons: Qt.LeftButton | Qt.RightButton
-                cursorShape: Qt.PointingHandCursor
-                onClicked: (mouse) => {
-                    if (mouse.button === Qt.RightButton) root.stopAll();
-                    else root.triggerPopout();
-                }
+        Row {
+            spacing: 2
+            DankIcon {
+                name: root.playingSounds.length > 0 ? "" : "music_note"
+                size: Theme.iconSizeSmall
+                color: root.playingSounds.length > 0 || sleepTimer.running ? Theme.primary : Theme.surfaceVariantText
+                anchors.verticalCenter: parent.verticalCenter
+                visible: !sleepTimer.running
             }
-
             Row {
-                anchors.centerIn: parent
+                anchors.verticalCenter: parent.verticalCenter
                 spacing: 2
                 visible: root.playingSounds.length > 0 && !sleepTimer.running
                 Repeater {
                     model: 3
                     Rectangle {
                         width: 2; height: 4; radius: 1
-                        color: Theme.onPrimary
+                        color: Theme.primary
                         anchors.verticalCenter: parent.verticalCenter
                         Timer {
                             running: root.playingSounds.length > 0; repeat: true; interval: 150 + (index * 50)
@@ -154,12 +148,21 @@ Timer {
                     }
                 }
             }
-
             StyledText {
                 text: sleepTimer.running ? formatRemainingTime(sleepTimer.remainingTime) : ""
-                font.pixelSize: Theme.iconSizeSmall
-                color: Theme.onPrimary
-                anchors.centerIn: parent
+                font.pixelSize: Theme.fontSizeMedium
+                color: Theme.primary
+                anchors.verticalCenter: parent.verticalCenter
+                visible: sleepTimer.running
+            }
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                cursorShape: Qt.PointingHandCursor
+                onClicked: (mouse) => {
+                    if (mouse.button === Qt.RightButton) root.stopAll();
+                    else root.triggerPopout();
+                }
             }
         }
     }
