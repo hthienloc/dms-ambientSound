@@ -41,12 +41,12 @@ PluginSettings {
                 label: "Default Volume"
                 description: "Initial volume level when a sound is first played."
                 options: [
-                    { label: "25%", value: 25 },
-                    { label: "50%", value: 50 },
-                    { label: "75%", value: 75 },
-                    { label: "100%", value: 100 }
+                    { label: "25%", value: "25" },
+                    { label: "50%", value: "50" },
+                    { label: "75%", value: "75" },
+                    { label: "100%", value: "100" }
                 ]
-                defaultValue: 70
+                defaultValue: "70"
             }
         }
     }
