@@ -9,7 +9,7 @@ PluginComponent {
     id: root
 
     // Right-click action on pill
-    pillRightClickAction: () => root.stopAll()
+    pillRightClickAction: () => root.toggleMute()
 
     // Layout constants
     readonly property real cellWidth: (root.popoutWidth - (root.gridSpacing * 2) - 16) / 3
@@ -38,7 +38,9 @@ PluginComponent {
         { name: "coffee-shop", icon: "local_cafe" },
         { name: "city", icon: "location_city" },
         { name: "train", icon: "train" },
-        { name: "boat", icon: "sailing" }
+        { name: "boat", icon: "sailing" },
+        { name: "white-noise", icon: "blur_on" },
+        { name: "pink-noise", icon: "blur_linear" }
     ]
 
     // Sleep timer presets
@@ -54,11 +56,13 @@ PluginComponent {
     // Audio state
     property var playingSounds: []
     property int masterVolume: parseInt(pluginData.defaultVolume) || 75
+    property bool isMuted: false
 
     // Helper – mpv commands
     function playSoundCmd(sound) {
+        var vol = root.isMuted ? 0 : root.masterVolume;
         var soundFile = pluginDir + "/sounds/" + sound + ".ogg";
-        return "mpv --no-video --no-config --loop=inf --volume=" + root.masterVolume + " '" + soundFile + "' > /dev/null 2>&1";
+        return "mpv --no-video --no-config --loop=inf --volume=" + vol + " '" + soundFile + "' > /dev/null 2>&1";
     }
 
     function killSoundCmd(pattern) {
@@ -66,6 +70,11 @@ PluginComponent {
     }
 
     // Audio logic
+    function toggleMute() {
+        if (playingSounds.length === 0) return;
+        isMuted = !isMuted;
+        restartAll();
+    }
     function toggleSound(sound) {
         var idx = playingSounds.indexOf(sound);
         var list = playingSounds.slice();
@@ -75,7 +84,7 @@ PluginComponent {
             playingSounds = list;
             Proc.runCommand("stop-" + sound, ["bash", "-c", killSoundCmd(sound)], null, 0);
             if (list.length === 0) {
-                root.masterVolume = parseInt(pluginData.defaultVolume) || 75;
+                root.isMuted = false;
             }
         } else {
             list.push(sound);
@@ -86,8 +95,8 @@ PluginComponent {
 
     function stopAll() {
         playingSounds = [];
+        isMuted = false;
         Proc.runCommand("stop-all", ["bash", "-c", killSoundCmd(".*")], null, 0);
-        root.masterVolume = parseInt(pluginData.defaultVolume) || 75;
     }
 
     function restartAll() {
@@ -103,7 +112,7 @@ PluginComponent {
         var newVol = Math.min(100, Math.max(0, root.masterVolume + delta));
         if (newVol !== root.masterVolume) {
             root.masterVolume = newVol;
-            root.restartAll();
+            volumeDebounceTimer.restart();
         }
     }
 
@@ -113,6 +122,13 @@ PluginComponent {
     }
 
     // Timers
+    Timer {
+        id: volumeDebounceTimer
+        interval: 250
+        repeat: false
+        onTriggered: root.restartAll()
+    }
+
     Timer {
         id: autoStartTimer
         interval: 2000
@@ -175,20 +191,20 @@ PluginComponent {
                 anchors.centerIn: parent
                 spacing: 4
 
-                // Only show the note icon when nothing is playing
+                // Only show the note icon when nothing is playing or when muted
                 DankIcon {
-                    name: "music_note"
+                    name: root.isMuted ? "volume_off" : "music_note"
                     size: Theme.iconSizeMedium
-                    color: Theme.surfaceVariantText
-                    visible: root.playingSounds.length === 0
+                    color: root.isMuted ? Theme.error : Theme.surfaceVariantText
+                    visible: root.playingSounds.length === 0 || root.isMuted
                     anchors.verticalCenter: parent.verticalCenter
                 }
 
-                // Dancing bars, visible only when something is playing
+                // Dancing bars, visible only when something is playing and NOT muted
                 Row {
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: 1   // tighter bars
-                    visible: root.playingSounds.length > 0
+                    visible: root.playingSounds.length > 0 && !root.isMuted
                     Repeater {
                         model: 5   // 5 bars
                         Rectangle {
@@ -234,28 +250,41 @@ PluginComponent {
                     width: parent.width
                     spacing: Theme.spacingS
                     DankIcon {
-                        name: "volume_down"
-                        size: 18
-                        color: Theme.surfaceVariantText
+                        name: root.isMuted ? "volume_off" : "volume_up"
+                        size: 22
+                        color: root.isMuted ? Theme.error : (root.playingSounds.length > 0 ? Theme.primary : Theme.surfaceVariantText)
                         anchors.verticalCenter: parent.verticalCenter
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.toggleMute()
+                        }
                     }
                     DankSlider {
                         id: volumeSlider
                         value: root.masterVolume
-                        width: parent.width - 60
+                        width: parent.width - 40
                         minimum: 0; maximum: 100
                         centerMinimum: false; unit: "%"; showValue: true
                         wheelEnabled: false
                         onSliderValueChanged: v => {
                             root.masterVolume = v;
-                            root.restartAll();
+                            if (v > 0 && root.isMuted) root.isMuted = false;
+                            volumeDebounceTimer.restart();
                         }
-                    }
-                    DankIcon {
-                        name: "volume_up"
-                        size: 18
-                        anchors.verticalCenter: parent.verticalCenter
-                        color: root.playingSounds.length > 0 ? Theme.primary : Theme.surfaceVariantText
+                        MouseArea {
+                            anchors.fill: parent
+                            acceptedButtons: Qt.NoButton // Để click vẫn xuyên qua được Slider
+                            onWheel: (wheel) => {
+                                var delta = wheel.angleDelta.y > 0 ? 5 : -5;
+                                var newVol = Math.min(100, Math.max(0, root.masterVolume + delta));
+                                if (newVol !== root.masterVolume) {
+                                    root.masterVolume = newVol;
+                                    if (newVol > 0 && root.isMuted) root.isMuted = false;
+                                    volumeDebounceTimer.restart();
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -356,7 +385,7 @@ PluginComponent {
                     }
 
                     StyledText {
-                        text: "Right-click icon to stop all"
+                        text: "Right-click icon to mute/unmute"
                         font.pixelSize: Theme.fontSizeSmall
                         color: Theme.surfaceVariantText
                         anchors.horizontalCenter: parent.horizontalCenter

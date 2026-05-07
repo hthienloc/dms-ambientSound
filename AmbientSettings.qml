@@ -194,6 +194,18 @@ PluginSettings {
                 label: "Boat"
                 defaultValue: false
             }
+
+            ToggleSetting {
+                settingKey: "autoStartWhiteNoise"
+                label: "White Noise"
+                defaultValue: false
+            }
+
+            ToggleSetting {
+                settingKey: "autoStartPinkNoise"
+                label: "Pink Noise"
+                defaultValue: false
+            }
         }
     }
 }
