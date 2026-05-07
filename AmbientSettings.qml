@@ -36,18 +36,14 @@ PluginSettings {
                 color: Theme.surfaceText
             }
 
-            SelectionSetting {
+            SliderSetting {
                 settingKey: "defaultVolume"
                 label: "Default Volume"
                 description: "Initial volume when starting."
-                options: [
-                    { label: "0%", value: "0" },
-                    { label: "25%", value: "25" },
-                    { label: "50%", value: "50" },
-                    { label: "75%", value: "75" },
-                    { label: "100%", value: "100" }
-                ]
-                defaultValue: "100"
+                minimum: 0
+                maximum: 100
+                unit: "%"
+                defaultValue: 75
             }
         }
     }
