@@ -121,40 +121,50 @@ Timer {
     // --- UI Components ---
 
     horizontalBarPill: Component {
-        Row {
-            spacing: 2
-            DankIcon {
-                name: root.playingSounds.length > 0 ? "" : "music_note"
-                size: Theme.iconSizeSmall
-                color: root.playingSounds.length > 0 || sleepTimer.running ? Theme.primary : Theme.surfaceVariantText
-                anchors.verticalCenter: parent.verticalCenter
-                visible: !sleepTimer.running
-            }
+        StyledRect {
+            width: pillContent.implicitWidth + Theme.spacingM * 2
+            height: parent.widgetThickness
+            radius: Theme.cornerRadius
+            color: root.playingSounds.length > 0 || sleepTimer.running ? Theme.primaryContainer : "transparent"
+            
             Row {
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: 2
-                visible: root.playingSounds.length > 0 && !sleepTimer.running
-                Repeater {
-                    model: 3
-                    Rectangle {
-                        width: 2; height: 4; radius: 1
-                        color: Theme.primary
-                        anchors.verticalCenter: parent.verticalCenter
-                        Timer {
-                            running: root.playingSounds.length > 0; repeat: true; interval: 150 + (index * 50)
-                            onTriggered: parent.height = 4 + Math.random() * 8
+                id: pillContent
+                anchors.centerIn: parent
+                spacing: 4
+                DankIcon {
+                    name: root.playingSounds.length > 0 ? "" : "music_note"
+                    size: Theme.iconSizeSmall
+                    color: root.playingSounds.length > 0 || sleepTimer.running ? Theme.onPrimaryContainer : Theme.surfaceVariantText
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: !sleepTimer.running
+                }
+                Row {
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 2
+                    visible: root.playingSounds.length > 0 && !sleepTimer.running
+                    Repeater {
+                        model: 3
+                        Rectangle {
+                            width: 2; height: 4; radius: 1
+                            color: Theme.onPrimaryContainer
+                            anchors.verticalCenter: parent.verticalCenter
+                            Timer {
+                                running: root.playingSounds.length > 0; repeat: true; interval: 150 + (index * 50)
+                                onTriggered: parent.height = 4 + Math.random() * 8
+                            }
+                            Behavior on height { NumberAnimation { duration: 150 } }
                         }
-                        Behavior on height { NumberAnimation { duration: 150 } }
                     }
                 }
+                StyledText {
+                    text: sleepTimer.running ? formatRemainingTime(sleepTimer.remainingTime) : ""
+                    font.pixelSize: Theme.fontSizeMedium
+                    color: root.playingSounds.length > 0 || sleepTimer.running ? Theme.onPrimaryContainer : Theme.surfaceVariantText
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: sleepTimer.running
+                }
             }
-            StyledText {
-                text: sleepTimer.running ? formatRemainingTime(sleepTimer.remainingTime) : ""
-                font.pixelSize: Theme.fontSizeMedium
-                color: Theme.primary
-                anchors.verticalCenter: parent.verticalCenter
-                visible: sleepTimer.running
-            }
+            
             MouseArea {
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
