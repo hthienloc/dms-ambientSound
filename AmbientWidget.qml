@@ -249,6 +249,10 @@ Timer {
                         backgroundColor: Theme.errorContainer; textColor: Theme.error
                         onClicked: root.stopAll()
                     }
+                    StyledText {
+                        text: "Right-click icon to stop all"; font.pixelSize: Theme.fontSizeSmall; color: Theme.surfaceVariantText
+                        anchors.horizontalCenter: parent.horizontalCenter; visible: (root.playingSounds.length > 0) && (pluginData.showReminderText ?? true)
+                    }
                 }
             }
         }

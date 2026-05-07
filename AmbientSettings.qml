@@ -78,6 +78,13 @@ PluginSettings {
                 defaultValue: true
             }
 
+            ToggleSetting {
+                settingKey: "showReminderText"
+                label: "Show Reminder Text"
+                description: "Show helper text like right-click to stop."
+                defaultValue: true
+            }
+
             SelectionSetting {
                 settingKey: "sleepTimerDuration"
                 label: "Default Duration"
