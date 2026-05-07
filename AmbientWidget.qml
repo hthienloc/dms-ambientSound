@@ -97,9 +97,6 @@ Timer {
             }
         }
     }
-            }
-        }
-    }
 
     Timer {
         id: sleepTimer
