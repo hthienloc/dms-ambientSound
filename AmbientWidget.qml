@@ -125,7 +125,6 @@ Timer {
             iconName: root.playingSounds.length > 0 ? "" : "music_note"
             iconSize: Theme.iconSizeSmall
             backgroundColor: (root.playingSounds.length > 0 || sleepTimer.running) ? Theme.primary : "transparent"
-            text: sleepTimer.running ? formatRemainingTime(sleepTimer.remainingTime) : ""
             
             MouseArea {
                 anchors.fill: parent
@@ -139,8 +138,8 @@ Timer {
 
             Row {
                 anchors.centerIn: parent
-                visible: root.playingSounds.length > 0 && !sleepTimer.running
                 spacing: 2
+                visible: root.playingSounds.length > 0 && !sleepTimer.running
                 Repeater {
                     model: 3
                     Rectangle {
@@ -154,6 +153,13 @@ Timer {
                         Behavior on height { NumberAnimation { duration: 150 } }
                     }
                 }
+            }
+
+            StyledText {
+                text: sleepTimer.running ? formatRemainingTime(sleepTimer.remainingTime) : ""
+                font.pixelSize: Theme.iconSizeSmall
+                color: Theme.onPrimary
+                anchors.centerIn: parent
             }
         }
     }
