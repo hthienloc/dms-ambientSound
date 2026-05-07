@@ -65,6 +65,14 @@ PluginComponent {
     property var playingSounds: []
     property int masterVolume: parseInt(pluginData.defaultVolume) || 75
 
+    Component.onCompleted: {
+        if (pluginData.autoStart === true && pluginData.autoStartSounds) {
+            pluginData.autoStartSounds.forEach(function(s) {
+                root.toggleSound(s);
+            });
+        }
+    }
+
     readonly property var sounds: [
         { name: "rain", icon: "water_drop" },
         { name: "fireplace", icon: "local_fire_department" },
