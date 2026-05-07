@@ -78,18 +78,26 @@ PluginComponent {
         { name: "summer-night", icon: "dark_mode" }
     ]
 
-    // Auto-start on load
-    function autoStart() {
-        var sounds = root.sounds;
-        for (var i = 0; i < sounds.length; i++) {
-            var key = "autoStart" + sounds[i].name.charAt(0).toUpperCase() + sounds[i].name.slice(1);
-            if (pluginData[key]) {
-                root.toggleSound(sounds[i].name);
+    Timer {
+        id: autoStartTimer
+        interval: 2000
+        onTriggered: {
+            console.log("AmbientSound autoStart running, pluginData:", JSON.stringify(pluginData));
+            var sounds = root.sounds;
+            for (var i = 0; i < sounds.length; i++) {
+                var key = "autoStart" + sounds[i].name.charAt(0).toUpperCase() + sounds[i].name.slice(1).replace("-", "");
+                if (pluginData[key]) {
+                    console.log("Auto-starting:", sounds[i].name);
+                    root.toggleSound(sounds[i].name);
+                }
             }
         }
     }
 
-    Component.onCompleted: root.autoStart()
+    Component.onCompleted: {
+        console.log("AmbientSound loaded");
+        autoStartTimer.start();
+    }
 
     // --- UI Components ---
 
