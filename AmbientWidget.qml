@@ -235,22 +235,22 @@ Timer {
                             anchors.verticalCenter: parent.verticalCenter
                         }
                         DankButton {
-                            text: "15m"; width: 45; height: 24; fontSize: 10
+                            text: "15m"; width: 45; height: 24
                             visible: !sleepTimer.running
                             onClicked: { sleepTimer.interval = 15 * 60 * 1000; sleepTimer.remainingTime = 15 * 60 * 1000; sleepTimer.start(); }
                         }
                         DankButton {
-                            text: "30m"; width: 45; height: 24; fontSize: 10
+                            text: "30m"; width: 45; height: 24
                             visible: !sleepTimer.running
                             onClicked: { sleepTimer.interval = 30 * 60 * 1000; sleepTimer.remainingTime = 30 * 60 * 1000; sleepTimer.start(); }
                         }
                         DankButton {
-                            text: "1h"; width: 45; height: 24; fontSize: 10
+                            text: "1h"; width: 45; height: 24
                             visible: !sleepTimer.running
                             onClicked: { sleepTimer.interval = 60 * 60 * 1000; sleepTimer.remainingTime = 60 * 60 * 1000; sleepTimer.start(); }
                         }
                         DankButton {
-                            text: "Off"; width: 45; height: 24; fontSize: 10
+                            text: "Off"; width: 45; height: 24
                             backgroundColor: Theme.errorContainer; textColor: Theme.error
                             visible: sleepTimer.running
                             onClicked: { sleepTimer.stop(); }
