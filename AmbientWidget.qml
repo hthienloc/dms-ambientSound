@@ -90,7 +90,7 @@ Timer {
                 }
             }
             if (pluginData.enableSleepTimer) {
-                var minutes = parseInt(pluginData.sleepTimerDuration) || 30;
+                var minutes = parseInt(pluginData.sleepTimerDuration) || 0;
                 sleepTimer.interval = minutes * 60 * 1000;
                 sleepTimer.remainingTime = minutes * 60 * 1000;
                 sleepTimer.start();
@@ -126,19 +126,18 @@ Timer {
             DankIcon {
                 name: root.playingSounds.length > 0 ? "" : "music_note"
                 size: Theme.iconSizeSmall
-                color: root.playingSounds.length > 0 || sleepTimer.running ? Theme.onPrimary : Theme.surfaceVariantText
+                color: Theme.surfaceVariantText
                 anchors.verticalCenter: parent.verticalCenter
-                visible: !sleepTimer.running
             }
             Row {
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 2
-                visible: root.playingSounds.length > 0 && !sleepTimer.running
+                visible: root.playingSounds.length > 0
                 Repeater {
                     model: 3
                     Rectangle {
                         width: 2; height: 4; radius: 1
-                        color: Theme.onPrimary
+                        color: Theme.primary
                         anchors.verticalCenter: parent.verticalCenter
                         Timer {
                             running: root.playingSounds.length > 0; repeat: true; interval: 150 + (index * 50)
@@ -147,13 +146,6 @@ Timer {
                         Behavior on height { NumberAnimation { duration: 150 } }
                     }
                 }
-            }
-            StyledText {
-                text: sleepTimer.running ? formatRemainingTime(sleepTimer.remainingTime) : ""
-                font.pixelSize: Theme.fontSizeMedium
-                color: Theme.onPrimary
-                anchors.verticalCenter: parent.verticalCenter
-                visible: sleepTimer.running
             }
             MouseArea {
                 anchors.fill: parent

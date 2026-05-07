@@ -90,6 +90,7 @@ PluginSettings {
                 label: "Default Duration"
                 description: "Default duration when starting timer."
                 options: [
+                    { label: "Off", value: "0" },
                     { label: "15 minutes", value: "15" },
                     { label: "30 minutes", value: "30" },
                     { label: "45 minutes", value: "45" },
@@ -97,7 +98,7 @@ PluginSettings {
                     { label: "1.5 hours", value: "90" },
                     { label: "2 hours", value: "120" }
                 ]
-                defaultValue: "30"
+                defaultValue: "Off"
                 visible: pluginData.enableSleepTimer ?? true
             }
         }
