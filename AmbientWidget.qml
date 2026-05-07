@@ -58,6 +58,58 @@ PluginComponent {
     property int masterVolume: pluginData.defaultVolume !== undefined ? parseInt(pluginData.defaultVolume) : 75
     property bool isMuted: false
 
+    // Preset state
+    property var presets: pluginData.presets || []
+    property int editingIndex: -1
+
+    function savePreset() {
+        if (playingSounds.length === 0) {
+            ToastService.showError("Play some sounds first to save as preset!");
+            return;
+        }
+        var newPresets = presets.slice();
+        var presetName = "Preset " + (newPresets.length + 1);
+        newPresets.push({
+            name: presetName,
+            sounds: playingSounds.slice(),
+            volume: root.masterVolume
+        });
+        presets = newPresets;
+        pluginData.presets = newPresets;
+        ToastService.showInfo("Saved " + presetName);
+    }
+
+    function loadPreset(preset) {
+        // First kill everything and wait for it to finish
+        Proc.runCommand("kill-for-preset", ["bash", "-c", killSoundCmd(".*")], (output, exitCode) => {
+            root.isMuted = false;
+            root.masterVolume = preset.volume;
+            root.playingSounds = preset.sounds.slice();
+            
+            // Now start playing each sound in the preset
+            for (var i = 0; i < root.playingSounds.length; i++) {
+                Proc.runCommand("play-" + root.playingSounds[i], ["bash", "-c", playSoundCmd(root.playingSounds[i])], null, 0);
+            }
+        }, 0);
+    }
+
+    function deletePreset(index) {
+        var newPresets = presets.slice();
+        newPresets.splice(index, 1);
+        presets = newPresets;
+        pluginData.presets = newPresets;
+    }
+
+    function renamePreset(index, newName) {
+        if (newName && newName.trim() !== "") {
+            var newPresets = presets.slice();
+            newPresets[index].name = newName.trim();
+            presets = newPresets;
+            pluginData.presets = newPresets;
+        }
+        editingIndex = -1;
+    }
+
     // Helper – mpv commands
     function playSoundCmd(sound) {
         var vol = root.isMuted ? 0 : root.masterVolume;
@@ -165,7 +217,22 @@ PluginComponent {
         onTriggered: sleepTimer.remainingTime = Math.max(0, sleepTimer.remainingTime - 1000);
     }
 
-    Component.onCompleted: autoStartTimer.start()
+    Component.onCompleted: {
+        autoStartTimer.start();
+        // Initialize default preset only once
+        if (pluginData.hasInitializedPresets === undefined) {
+            var defaultPresets = [
+                {
+                    name: "Relaxing Rain",
+                    sounds: ["rain", "birds", "wind"],
+                    volume: 75
+                }
+            ];
+            pluginData.presets = defaultPresets;
+            presets = defaultPresets;
+            pluginData.hasInitializedPresets = true;
+        }
+    }
 
     // ── Pill (horizontal & vertical) ──
     horizontalBarPill: Component {
@@ -214,7 +281,7 @@ PluginComponent {
                             color: Theme.primary
                             anchors.verticalCenter: parent.verticalCenter
                             Timer {
-                                running: root.playingSounds.length > 0
+                                running: root.playingSounds.length > 0 && !root.isMuted
                                 repeat: true
                                 interval: 150 + (index * 30)   // varied phases
                                 onTriggered: parent.height = 6 + Math.random() * 12   // up to 18px
@@ -231,7 +298,7 @@ PluginComponent {
 
     // Popout dimensions
     popoutWidth: 380
-    popoutHeight: 420
+    popoutHeight: root.presets.length > 0 ? 550 : 470
 
     // Popout content
     popoutContent: Component {
@@ -292,6 +359,8 @@ PluginComponent {
                 Flow {
                     width: parent.width
                     spacing: root.gridSpacing
+                    
+                    // 14 Sound Tiles
                     Repeater {
                         model: root.sounds
                         delegate: Rectangle {
@@ -322,6 +391,39 @@ PluginComponent {
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: root.toggleSound(modelData.name)
                             }
+                        }
+                    }
+
+                    // 15th Slot: Save Preset Button
+                    Rectangle {
+                        width: root.cellWidth
+                        height: root.cellHeight
+                        radius: Theme.cornerRadius
+                        color: Theme.surfaceContainerHigh
+                        border.width: 1
+                        border.color: Theme.surfaceVariant
+
+                        Column {
+                            anchors.centerIn: parent
+                            spacing: 2
+                            DankIcon {
+                                name: "bookmark_add"
+                                size: root.iconSize
+                                color: Theme.primary
+                                anchors.horizontalCenter: parent.horizontalCenter
+                            }
+                            StyledText {
+                                text: "Save Preset"
+                                font.pixelSize: root.fontSize
+                                font.weight: Font.Medium
+                                color: Theme.primary
+                                anchors.horizontalCenter: parent.horizontalCenter
+                            }
+                        }
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.savePreset()
                         }
                     }
                 }
@@ -382,6 +484,87 @@ PluginComponent {
                         backgroundColor: Theme.errorContainer
                         textColor: Theme.error
                         onClicked: root.stopAll()
+                    }
+
+                    // Presets area
+                    Column {
+                        width: parent.width
+                        spacing: 4
+                        visible: root.presets.length > 0
+
+                        StyledText {
+                            text: "Your Presets"
+                            font.pixelSize: Theme.fontSizeSmall
+                            font.weight: Font.Bold
+                            color: Theme.surfaceVariantText
+                        }
+
+                        Flow {
+                            width: parent.width
+                            spacing: 4
+                            Repeater {
+                                model: root.presets
+                                delegate: Item {
+                                    width: (parent.width - 4) / 2
+                                    height: 32
+
+                                    DankButton {
+                                        id: presetButton
+                                        text: modelData.name
+                                        width: parent.width - 48
+                                        height: parent.height
+                                        visible: root.editingIndex !== index
+                                        onClicked: root.loadPreset(modelData)
+                                    }
+
+                                    DankTextField {
+                                        id: editField
+                                        width: parent.width - 48
+                                        height: parent.height
+                                        text: modelData.name
+                                        visible: root.editingIndex === index
+                                        onEditingFinished: root.renamePreset(index, text)
+                                        Component.onCompleted: {
+                                            if (root.editingIndex === index) forceActiveFocus();
+                                        }
+                                    }
+
+                                    DankIcon {
+                                        name: root.editingIndex === index ? "check" : "edit"
+                                        size: 16
+                                        anchors.right: deleteIcon.left
+                                        anchors.rightMargin: 4
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        color: Theme.surfaceVariantText
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                if (root.editingIndex === index) {
+                                                    root.renamePreset(index, editField.text);
+                                                } else {
+                                                    root.editingIndex = index;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    DankIcon {
+                                        id: deleteIcon
+                                        name: "close"
+                                        size: 16
+                                        anchors.right: parent.right
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        color: Theme.error
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: root.deletePreset(index)
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     StyledText {
