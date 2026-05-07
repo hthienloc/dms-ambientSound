@@ -65,10 +65,6 @@ PluginComponent {
     property var playingSounds: []
     property int masterVolume: parseInt(pluginData.defaultVolume) || 75
 
-    Component.onCompleted: {
-        console.log("AmbientSound: checking auto-start, pluginData:", JSON.stringify(pluginData));
-    }
-
     readonly property var sounds: [
         { name: "rain", icon: "water_drop" },
         { name: "fireplace", icon: "local_fire_department" },
@@ -81,6 +77,19 @@ PluginComponent {
         { name: "stream", icon: "water" },
         { name: "summer-night", icon: "dark_mode" }
     ]
+
+    // Auto-start on load
+    function autoStart() {
+        var sounds = root.sounds;
+        for (var i = 0; i < sounds.length; i++) {
+            var key = "autoStart" + sounds[i].name.charAt(0).toUpperCase() + sounds[i].name.slice(1);
+            if (pluginData[key]) {
+                root.toggleSound(sounds[i].name);
+            }
+        }
+    }
+
+    Component.onCompleted: root.autoStart()
 
     // --- UI Components ---
 
