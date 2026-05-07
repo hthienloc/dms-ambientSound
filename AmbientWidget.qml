@@ -124,7 +124,8 @@ Timer {
         DankActionButton {
             iconName: root.playingSounds.length > 0 ? "" : "music_note"
             iconSize: Theme.iconSizeSmall
-            backgroundColor: root.playingSounds.length > 0 ? Theme.primary : "transparent"
+            backgroundColor: (root.playingSounds.length > 0 || sleepTimer.running) ? Theme.primary : "transparent"
+            text: sleepTimer.running ? formatRemainingTime(sleepTimer.remainingTime) : ""
             
             MouseArea {
                 anchors.fill: parent
@@ -138,7 +139,7 @@ Timer {
 
             Row {
                 anchors.centerIn: parent
-                visible: root.playingSounds.length > 0
+                visible: root.playingSounds.length > 0 && !sleepTimer.running
                 spacing: 2
                 Repeater {
                     model: 3
@@ -155,6 +156,16 @@ Timer {
                 }
             }
         }
+    }
+
+    function formatRemainingTime(ms) {
+        var minutes = Math.ceil(ms / 60000);
+        if (minutes >= 60) {
+            var hours = Math.floor(minutes / 60);
+            var mins = minutes % 60;
+            return mins > 0 ? hours + "h" + mins : hours + "h";
+        }
+        return minutes + "m";
     }
 
     verticalBarPill: horizontalBarPill
