@@ -28,15 +28,17 @@ PluginComponent {
     // Sound definitions
     readonly property var sounds: [
         { name: "rain", icon: "water_drop" },
-        { name: "fireplace", icon: "local_fire_department" },
-        { name: "waves", icon: "waves" },
-        { name: "wind", icon: "air" },
         { name: "storm", icon: "thunderstorm" },
-        { name: "birds", icon: "flutter_dash" },
-        { name: "city", icon: "location_city" },
-        { name: "coffee-shop", icon: "local_cafe" },
+        { name: "wind", icon: "air" },
+        { name: "waves", icon: "waves" },
         { name: "stream", icon: "water" },
-        { name: "summer-night", icon: "dark_mode" }
+        { name: "birds", icon: "flutter_dash" },
+        { name: "summer-night", icon: "dark_mode" },
+        { name: "fireplace", icon: "local_fire_department" },
+        { name: "coffee-shop", icon: "local_cafe" },
+        { name: "city", icon: "location_city" },
+        { name: "train", icon: "train" },
+        { name: "boat", icon: "sailing" }
     ]
 
     // Sleep timer presets

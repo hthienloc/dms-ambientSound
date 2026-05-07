@@ -130,14 +130,8 @@ PluginSettings {
             }
 
             ToggleSetting {
-                settingKey: "autoStartFireplace"
-                label: "Fireplace"
-                defaultValue: false
-            }
-
-            ToggleSetting {
-                settingKey: "autoStartWaves"
-                label: "Waves"
+                settingKey: "autoStartStorm"
+                label: "Storm"
                 defaultValue: false
             }
 
@@ -148,26 +142,8 @@ PluginSettings {
             }
 
             ToggleSetting {
-                settingKey: "autoStartStorm"
-                label: "Storm"
-                defaultValue: false
-            }
-
-            ToggleSetting {
-                settingKey: "autoStartBirds"
-                label: "Birds"
-                defaultValue: false
-            }
-
-            ToggleSetting {
-                settingKey: "autoStartCity"
-                label: "City"
-                defaultValue: false
-            }
-
-            ToggleSetting {
-                settingKey: "autoStartCoffeeShop"
-                label: "Coffee Shop"
+                settingKey: "autoStartWaves"
+                label: "Waves"
                 defaultValue: false
             }
 
@@ -178,8 +154,44 @@ PluginSettings {
             }
 
             ToggleSetting {
+                settingKey: "autoStartBirds"
+                label: "Birds"
+                defaultValue: false
+            }
+
+            ToggleSetting {
                 settingKey: "autoStartSummerNight"
                 label: "Summer Night"
+                defaultValue: false
+            }
+
+            ToggleSetting {
+                settingKey: "autoStartFireplace"
+                label: "Fireplace"
+                defaultValue: false
+            }
+
+            ToggleSetting {
+                settingKey: "autoStartCoffeeShop"
+                label: "Coffee Shop"
+                defaultValue: false
+            }
+
+            ToggleSetting {
+                settingKey: "autoStartCity"
+                label: "City"
+                defaultValue: false
+            }
+
+            ToggleSetting {
+                settingKey: "autoStartTrain"
+                label: "Train"
+                defaultValue: false
+            }
+
+            ToggleSetting {
+                settingKey: "autoStartBoat"
+                label: "Boat"
                 defaultValue: false
             }
         }
