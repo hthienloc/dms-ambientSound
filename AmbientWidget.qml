@@ -227,6 +227,7 @@ Timer {
                     // Sleep Timer Row
                     Row {
                         width: parent.width; spacing: 4
+                        visible: pluginData.enableSleepTimer ?? true
                         DankIcon { name: "timer"; size: 18; color: sleepTimer.running ? Theme.primary : Theme.surfaceVariantText; anchors.verticalCenter: parent.verticalCenter }
                         StyledText { 
                             text: sleepTimer.running ? Math.ceil(sleepTimer.remainingTime / 60000) + " min left" : ""; 
@@ -234,23 +235,19 @@ Timer {
                             color: sleepTimer.running ? Theme.primary : Theme.surfaceVariantText
                             anchors.verticalCenter: parent.verticalCenter
                         }
-                        DankButton { text: "15m"; width: 40; height: 24; visible: !sleepTimer.running; onClicked: { sleepTimer.interval = 15 * 60 * 1000; sleepTimer.remainingTime = 15 * 60 * 1000; sleepTimer.start(); } }
-                        DankButton { text: "30m"; width: 40; height: 24; visible: !sleepTimer.running; onClicked: { sleepTimer.interval = 30 * 60 * 1000; sleepTimer.remainingTime = 30 * 60 * 1000; sleepTimer.start(); } }
-                        DankButton { text: "45m"; width: 40; height: 24; visible: !sleepTimer.running; onClicked: { sleepTimer.interval = 45 * 60 * 1000; sleepTimer.remainingTime = 45 * 60 * 1000; sleepTimer.start(); } }
-                        DankButton { text: "1h"; width: 40; height: 24; visible: !sleepTimer.running; onClicked: { sleepTimer.interval = 60 * 60 * 1000; sleepTimer.remainingTime = 60 * 60 * 1000; sleepTimer.start(); } }
-                        DankButton { text: "1.5h"; width: 40; height: 24; visible: !sleepTimer.running; onClicked: { sleepTimer.interval = 90 * 60 * 1000; sleepTimer.remainingTime = 90 * 60 * 1000; sleepTimer.start(); } }
-                        DankButton { text: "2h"; width: 40; height: 24; visible: !sleepTimer.running; onClicked: { sleepTimer.interval = 120 * 60 * 1000; sleepTimer.remainingTime = 120 * 60 * 1000; sleepTimer.start(); } }
-                        DankButton { text: "Off"; width: 40; height: 24; backgroundColor: Theme.errorContainer; textColor: Theme.error; visible: sleepTimer.running; onClicked: { sleepTimer.stop(); } }
+                        DankButton { text: "15m"; width: 48; height: 24; visible: !sleepTimer.running; onClicked: { sleepTimer.interval = 15 * 60 * 1000; sleepTimer.remainingTime = 15 * 60 * 1000; sleepTimer.start(); } }
+                        DankButton { text: "30m"; width: 48; height: 24; visible: !sleepTimer.running; onClicked: { sleepTimer.interval = 30 * 60 * 1000; sleepTimer.remainingTime = 30 * 60 * 1000; sleepTimer.start(); } }
+                        DankButton { text: "45m"; width: 48; height: 24; visible: !sleepTimer.running; onClicked: { sleepTimer.interval = 45 * 60 * 1000; sleepTimer.remainingTime = 45 * 60 * 1000; sleepTimer.start(); } }
+                        DankButton { text: "1h"; width: 48; height: 24; visible: !sleepTimer.running; onClicked: { sleepTimer.interval = 60 * 60 * 1000; sleepTimer.remainingTime = 60 * 60 * 1000; sleepTimer.start(); } }
+                        DankButton { text: "1.5h"; width: 48; height: 24; visible: !sleepTimer.running; onClicked: { sleepTimer.interval = 90 * 60 * 1000; sleepTimer.remainingTime = 90 * 60 * 1000; sleepTimer.start(); } }
+                        DankButton { text: "2h"; width: 48; height: 24; visible: !sleepTimer.running; onClicked: { sleepTimer.interval = 120 * 60 * 1000; sleepTimer.remainingTime = 120 * 60 * 1000; sleepTimer.start(); } }
+                        DankButton { text: "Off"; width: 48; height: 24; backgroundColor: Theme.errorContainer; textColor: Theme.error; visible: sleepTimer.running; onClicked: { sleepTimer.stop(); } }
                     }
 
                     DankButton {
                         text: "Stop All"; iconName: "stop"; width: parent.width; visible: root.playingSounds.length > 0
                         backgroundColor: Theme.errorContainer; textColor: Theme.error
                         onClicked: root.stopAll()
-                    }
-                    StyledText {
-                        text: "Right-click icon to stop all"; font.pixelSize: Theme.fontSizeSmall; color: Theme.surfaceVariantText
-                        anchors.horizontalCenter: parent.horizontalCenter; visible: root.playingSounds.length > 0
                     }
                 }
             }

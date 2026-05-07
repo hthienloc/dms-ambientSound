@@ -74,23 +74,24 @@ PluginSettings {
             ToggleSetting {
                 settingKey: "enableSleepTimer"
                 label: "Enable Sleep Timer"
-                description: "Auto-stop after specified duration."
-                defaultValue: false
+                description: "Show sleep timer controls."
+                defaultValue: true
             }
 
             SelectionSetting {
                 settingKey: "sleepTimerDuration"
-                label: "Duration"
-                description: "Stop playing after this time."
+                label: "Default Duration"
+                description: "Default duration when starting timer."
                 options: [
                     { label: "15 minutes", value: "15" },
                     { label: "30 minutes", value: "30" },
                     { label: "45 minutes", value: "45" },
                     { label: "1 hour", value: "60" },
+                    { label: "1.5 hours", value: "90" },
                     { label: "2 hours", value: "120" }
                 ]
                 defaultValue: "30"
-                visible: pluginData.enableSleepTimer ?? false
+                visible: pluginData.enableSleepTimer ?? true
             }
         }
     }
