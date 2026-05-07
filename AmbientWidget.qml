@@ -66,11 +66,17 @@ PluginComponent {
     property int masterVolume: parseInt(pluginData.defaultVolume) || 75
 
     Component.onCompleted: {
-        if (pluginData.autoStart === true && pluginData.autoStartSounds) {
-            pluginData.autoStartSounds.forEach(function(s) {
-                root.toggleSound(s);
-            });
-        }
+        // Auto-start sounds based on individual toggles
+        if (pluginData.autoStartRain) root.toggleSound("rain");
+        if (pluginData.autoStartFireplace) root.toggleSound("fireplace");
+        if (pluginData.autoStartWaves) root.toggleSound("waves");
+        if (pluginData.autoStartWind) root.toggleSound("wind");
+        if (pluginData.autoStartStorm) root.toggleSound("storm");
+        if (pluginData.autoStartBirds) root.toggleSound("birds");
+        if (pluginData.autoStartCity) root.toggleSound("city");
+        if (pluginData.autoStartCoffeeShop) root.toggleSound("coffee-shop");
+        if (pluginData.autoStartStream) root.toggleSound("stream");
+        if (pluginData.autoStartSummerNight) root.toggleSound("summer-night");
     }
 
     readonly property var sounds: [

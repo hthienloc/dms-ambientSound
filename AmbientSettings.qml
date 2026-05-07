@@ -61,40 +61,73 @@ PluginSettings {
             id: autoColumn
             anchors.fill: parent
             anchors.margins: Theme.spacingL
-            spacing: Theme.spacingM
+            spacing: Theme.spacingS
 
             StyledText {
-                text: "Auto-Start"
+                text: "Auto-Start on Login"
                 font.pixelSize: Theme.fontSizeMedium
                 font.weight: Font.Medium
                 color: Theme.surfaceText
             }
 
             ToggleSetting {
-                settingKey: "autoStart"
-                label: "Auto-Play on Login"
-                description: "Start playing selected sounds when DMS starts."
+                settingKey: "autoStartRain"
+                label: "Rain"
                 defaultValue: false
             }
 
-            MultiSelectionSetting {
-                settingKey: "autoStartSounds"
-                label: "Sounds to Auto-Play"
-                description: "Select sounds to play on startup."
-                options: [
-                    { label: "Rain", value: "rain" },
-                    { label: "Fireplace", value: "fireplace" },
-                    { label: "Waves", value: "waves" },
-                    { label: "Wind", value: "wind" },
-                    { label: "Storm", value: "storm" },
-                    { label: "Birds", value: "birds" },
-                    { label: "City", value: "city" },
-                    { label: "Coffee Shop", value: "coffee-shop" },
-                    { label: "Stream", value: "stream" },
-                    { label: "Summer Night", value: "summer-night" }
-                ]
-                defaultValue: []
-                visible: pluginData.autoStart ?? false
+            ToggleSetting {
+                settingKey: "autoStartFireplace"
+                label: "Fireplace"
+                defaultValue: false
+            }
+
+            ToggleSetting {
+                settingKey: "autoStartWaves"
+                label: "Waves"
+                defaultValue: false
+            }
+
+            ToggleSetting {
+                settingKey: "autoStartWind"
+                label: "Wind"
+                defaultValue: false
+            }
+
+            ToggleSetting {
+                settingKey: "autoStartStorm"
+                label: "Storm"
+                defaultValue: false
+            }
+
+            ToggleSetting {
+                settingKey: "autoStartBirds"
+                label: "Birds"
+                defaultValue: false
+            }
+
+            ToggleSetting {
+                settingKey: "autoStartCity"
+                label: "City"
+                defaultValue: false
+            }
+
+            ToggleSetting {
+                settingKey: "autoStartCoffeeShop"
+                label: "Coffee Shop"
+                defaultValue: false
+            }
+
+            ToggleSetting {
+                settingKey: "autoStartStream"
+                label: "Stream"
+                defaultValue: false
+            }
+
+            ToggleSetting {
+                settingKey: "autoStartSummerNight"
+                label: "Summer Night"
+                defaultValue: false
             }
         }
     }
