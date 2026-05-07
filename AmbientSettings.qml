@@ -9,37 +9,6 @@ PluginSettings {
     id: root
     pluginId: "ambientSound"
 
-    // Helper component for consistent section layout
-    component SettingsSection: StyledRect {
-        id: sectionRoot
-        property string title: ""
-        default property alias sectionContent: sectionColumn.data  // ← indent đúng
-
-        width: parent.width
-        implicitHeight: sectionColumn.implicitHeight + Theme.spacingL * 2
-        radius: Theme.cornerRadius
-        color: Theme.surfaceContainerHigh
-
-        Column {
-            id: sectionColumn
-            anchors {
-                top: parent.top
-                left: parent.left
-                right: parent.right
-                margins: Theme.spacingL
-            }
-            spacing: Theme.spacingM
-
-            StyledText {
-                text: sectionRoot.title
-                font.pixelSize: Theme.fontSizeMedium
-                font.weight: Font.Medium
-                color: Theme.surfaceText
-                visible: text !== ""
-            }
-        }
-    }
-
     StyledText {
         width: parent.width
         text: "Ambient Sound Settings"
@@ -48,15 +17,66 @@ PluginSettings {
         color: Theme.surfaceText
     }
 
-    SettingsSection {
-        title: "Audio"
-        NumberSetting {
-            settingKey: "defaultVolume"
-            label: "Default Volume (%)"
-            description: "Initial volume level when a sound is first played."
-            defaultValue: 70
-            minimum: 0
-            maximum: 100
+    StyledRect {
+        width: parent.width
+        height: volumeColumn.implicitHeight + Theme.spacingL * 2
+        radius: Theme.cornerRadius
+        color: Theme.surfaceContainerHigh
+
+        Column {
+            id: volumeColumn
+            anchors.fill: parent
+            anchors.margins: Theme.spacingL
+            spacing: Theme.spacingM
+
+            StyledText {
+                text: "Audio"
+                font.pixelSize: Theme.fontSizeMedium
+                font.weight: Font.Medium
+                color: Theme.surfaceText
+            }
+
+            SelectionSetting {
+                settingKey: "defaultVolume"
+                label: "Default Volume"
+                description: "Initial volume level when a sound is first played."
+                options: [
+                    { label: "25%", value: 25 },
+                    { label: "50%", value: 50 },
+                    { label: "75%", value: 75 },
+                    { label: "100%", value: 100 }
+                ]
+                defaultValue: 70
+            }
+        }
+    }
+
+    StyledRect {
+        width: parent.width
+        height: soundsColumn.implicitHeight + Theme.spacingL * 2
+        radius: Theme.cornerRadius
+        color: Theme.surfaceContainerHigh
+
+        Column {
+            id: soundsColumn
+            anchors.fill: parent
+            anchors.margins: Theme.spacingL
+            spacing: Theme.spacingM
+
+            StyledText {
+                text: "Required Files"
+                font.pixelSize: Theme.fontSizeMedium
+                font.weight: Font.Medium
+                color: Theme.surfaceText
+            }
+
+            StyledText {
+                width: parent.width
+                text: "This plugin requires sound files (.ogg) in the sounds/ folder.\n\nDownload from: github.com/rafaelmardojai/blanket"
+                font.pixelSize: Theme.fontSizeSmall
+                color: Theme.surfaceVariantText
+                wrapMode: Text.WordWrap
+            }
         }
     }
 }
