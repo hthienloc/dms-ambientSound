@@ -2,7 +2,7 @@
 
 DMS plugin for playing ambient sounds for focus and relaxation.
 
-![Screenshot](screenshot.png)
+<img src="screenshot.png" width="300" alt="Screenshot">
 
 ## Features
 
