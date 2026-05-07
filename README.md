@@ -2,6 +2,8 @@
 
 DMS plugin for playing ambient sounds for focus and relaxation.
 
+![Screenshot](screenshot.png)
+
 ## Features
 
 - Play multiple ambient sounds simultaneously
