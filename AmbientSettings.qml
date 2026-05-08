@@ -9,19 +9,55 @@ PluginSettings {
     id: root
     pluginId: "ambientSound"
 
+    readonly property var sounds: [
+        { name: "rain", icon: "water_drop" },
+        { name: "storm", icon: "thunderstorm" },
+        { name: "wind", icon: "air" },
+        { name: "waves", icon: "waves" },
+        { name: "stream", icon: "water" },
+        { name: "birds", icon: "flutter_dash" },
+        { name: "summer-night", icon: "dark_mode" },
+        { name: "fireplace", icon: "local_fire_department" },
+        { name: "coffee-shop", icon: "local_cafe" },
+        { name: "city", icon: "location_city" },
+        { name: "train", icon: "train" },
+        { name: "boat", icon: "sailing" },
+        { name: "white-noise", icon: "blur_on" },
+        { name: "pink-noise", icon: "blur_linear" }
+    ]
+
+    // State management for auto-start toggles
+    property var autoStartStates: ({})
+
+    function autoStartKey(soundName) {
+        return "autoStart" + soundName.charAt(0).toUpperCase() + soundName.slice(1).replace("-", "");
+    }
+
+    function updateAutoStartStates() {
+        let states = {};
+        for (let i = 0; i < sounds.length; i++) {
+            let key = autoStartKey(sounds[i].name);
+            states[key] = root.loadValue(key, false);
+        }
+        autoStartStates = states;
+    }
+
+    Component.onCompleted: updateAutoStartStates()
+    onSettingChanged: updateAutoStartStates()
+
     StyledText {
         width: parent.width
         text: "Ambient Sound Settings"
         font.pixelSize: Theme.fontSizeLarge
         font.weight: Font.Bold
-        color: Theme.surfaceText
+        color: Theme.primary
     }
 
     StyledRect {
         width: parent.width
         height: audioColumn.implicitHeight + Theme.spacingL * 2
         radius: Theme.cornerRadius
-        color: Theme.surfaceContainerHigh
+        color: Theme.surfaceContainer
 
         Column {
             id: audioColumn
@@ -52,7 +88,7 @@ PluginSettings {
         width: parent.width
         height: timerColumn.implicitHeight + Theme.spacingL * 2
         radius: Theme.cornerRadius
-        color: Theme.surfaceContainerHigh
+        color: Theme.surfaceContainer
 
         Column {
             id: timerColumn
@@ -94,8 +130,8 @@ PluginSettings {
                     { label: "1.5 hours", value: "90" },
                     { label: "2 hours", value: "120" }
                 ]
-                defaultValue: "Off"
-                visible: pluginData.enableSleepTimer ?? true
+                defaultValue: "0"
+                visible: root.loadValue("enableSleepTimer", true)
             }
         }
     }
@@ -104,13 +140,13 @@ PluginSettings {
         width: parent.width
         height: autoColumn.implicitHeight + Theme.spacingL * 2
         radius: Theme.cornerRadius
-        color: Theme.surfaceContainerHigh
+        color: Theme.surfaceContainer
 
         Column {
             id: autoColumn
             anchors.fill: parent
             anchors.margins: Theme.spacingL
-            spacing: Theme.spacingS
+            spacing: Theme.spacingM
 
             StyledText {
                 text: "Auto-Start on Login"
@@ -118,89 +154,57 @@ PluginSettings {
                 font.weight: Font.Medium
                 color: Theme.surfaceText
             }
-
-            ToggleSetting {
-                settingKey: "autoStartRain"
-                label: "Rain"
-                defaultValue: false
+            
+            StyledText {
+                text: "Select sounds to play automatically when you log in."
+                font.pixelSize: Theme.fontSizeSmall
+                color: Theme.surfaceVariantText
+                wrapMode: Text.WordWrap
+                width: parent.width
             }
 
-            ToggleSetting {
-                settingKey: "autoStartStorm"
-                label: "Storm"
-                defaultValue: false
-            }
+            Flow {
+                id: autoStartFlow
+                width: parent.width
+                spacing: 8
 
-            ToggleSetting {
-                settingKey: "autoStartWind"
-                label: "Wind"
-                defaultValue: false
-            }
+                Repeater {
+                    model: root.sounds
+                    delegate: Rectangle {
+                        width: (autoStartFlow.width - 16) / 3
+                        height: 44
+                        radius: Theme.cornerRadius
+                        
+                        readonly property string sKey: root.autoStartKey(modelData.name)
+                        readonly property bool isChecked: root.autoStartStates[sKey] ?? false
+                        
+                        color: isChecked ? Theme.primary : Theme.surfaceContainerHigh
+                        
+                        Row {
+                            anchors.centerIn: parent
+                            spacing: 6
+                            DankIcon {
+                                name: modelData.icon
+                                size: 18
+                                color: isChecked ? Theme.onPrimary : Theme.surfaceVariantText
+                            }
+                            StyledText {
+                                text: modelData.name.replace("-", " ")
+                                font.pixelSize: Theme.fontSizeSmall
+                                font.weight: isChecked ? Font.Bold : Font.Normal
+                                color: isChecked ? Theme.onPrimary : Theme.surfaceText
+                            }
+                        }
 
-            ToggleSetting {
-                settingKey: "autoStartWaves"
-                label: "Waves"
-                defaultValue: false
-            }
-
-            ToggleSetting {
-                settingKey: "autoStartStream"
-                label: "Stream"
-                defaultValue: false
-            }
-
-            ToggleSetting {
-                settingKey: "autoStartBirds"
-                label: "Birds"
-                defaultValue: false
-            }
-
-            ToggleSetting {
-                settingKey: "autoStartSummerNight"
-                label: "Summer Night"
-                defaultValue: false
-            }
-
-            ToggleSetting {
-                settingKey: "autoStartFireplace"
-                label: "Fireplace"
-                defaultValue: false
-            }
-
-            ToggleSetting {
-                settingKey: "autoStartCoffeeShop"
-                label: "Coffee Shop"
-                defaultValue: false
-            }
-
-            ToggleSetting {
-                settingKey: "autoStartCity"
-                label: "City"
-                defaultValue: false
-            }
-
-            ToggleSetting {
-                settingKey: "autoStartTrain"
-                label: "Train"
-                defaultValue: false
-            }
-
-            ToggleSetting {
-                settingKey: "autoStartBoat"
-                label: "Boat"
-                defaultValue: false
-            }
-
-            ToggleSetting {
-                settingKey: "autoStartWhiteNoise"
-                label: "White Noise"
-                defaultValue: false
-            }
-
-            ToggleSetting {
-                settingKey: "autoStartPinkNoise"
-                label: "Pink Noise"
-                defaultValue: false
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                root.saveValue(sKey, !isChecked);
+                            }
+                        }
+                    }
+                }
             }
         }
     }
