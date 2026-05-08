@@ -74,8 +74,7 @@ PluginComponent {
             sounds: playingSounds.slice(),
             volume: root.masterVolume
         });
-        presets = newPresets;
-        pluginData.presets = newPresets;
+        pluginService.savePluginData(root.pluginId, "presets", newPresets);
         ToastService.showInfo("Saved " + presetName);
     }
 
@@ -96,16 +95,15 @@ PluginComponent {
     function deletePreset(index) {
         var newPresets = presets.slice();
         newPresets.splice(index, 1);
-        presets = newPresets;
-        pluginData.presets = newPresets;
+        pluginService.savePluginData(root.pluginId, "presets", newPresets);
     }
 
     function renamePreset(index, newName) {
         if (newName && newName.trim() !== "") {
             var newPresets = presets.slice();
             newPresets[index].name = newName.trim();
-            presets = newPresets;
-            pluginData.presets = newPresets;
+            pluginService.savePluginData(root.pluginId, "presets", newPresets);
+            ToastService.showInfo("Preset renamed to " + newName);
         }
         editingIndex = -1;
     }
@@ -228,9 +226,8 @@ PluginComponent {
                     volume: 75
                 }
             ];
-            pluginData.presets = defaultPresets;
-            presets = defaultPresets;
-            pluginData.hasInitializedPresets = true;
+            pluginService.savePluginData(root.pluginId, "presets", defaultPresets);
+            pluginService.savePluginData(root.pluginId, "hasInitializedPresets", true);
         }
     }
 
@@ -312,7 +309,7 @@ PluginComponent {
                 width: parent.width
                 spacing: 8
 
-                // Volume slider
+                // Volume & Control bar
                 Row {
                     width: parent.width
                     spacing: Theme.spacingS
@@ -330,7 +327,7 @@ PluginComponent {
                     DankSlider {
                         id: volumeSlider
                         value: root.masterVolume
-                        width: parent.width - 40
+                        width: parent.width - 80
                         minimum: 0; maximum: 100
                         centerMinimum: false; unit: "%"; showValue: true
                         wheelEnabled: false
@@ -351,6 +348,28 @@ PluginComponent {
                                     volumeDebounceTimer.restart();
                                 }
                             }
+                        }
+                    }
+                    
+                    DankIcon {
+                        name: "cancel"
+                        size: 24
+                        color: root.playingSounds.length > 0 ? Theme.error : Theme.surfaceVariantText
+                        anchors.verticalCenter: parent.verticalCenter
+                        opacity: root.playingSounds.length > 0 ? 1.0 : 0.5
+                        
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: root.playingSounds.length > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
+                            onClicked: if (root.playingSounds.length > 0) root.stopAll()
+                        }
+                        
+                        MouseArea {
+                            id: maStop
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            hoverEnabled: true
+                            acceptedButtons: Qt.NoButton
                         }
                     }
                 }
@@ -474,16 +493,6 @@ PluginComponent {
                             visible: sleepTimer.running
                             onClicked: sleepTimer.stop()
                         }
-                    }
-
-                    DankButton {
-                        text: "Stop All"
-                        iconName: "stop"
-                        width: parent.width
-                        visible: root.playingSounds.length > 0
-                        backgroundColor: Theme.errorContainer
-                        textColor: Theme.error
-                        onClicked: root.stopAll()
                     }
 
                     // Presets area
