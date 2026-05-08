@@ -258,7 +258,7 @@ PluginComponent {
                 // Only show the note icon when nothing is playing or when muted
                 DankIcon {
                     name: root.isMuted ? "volume_off" : "music_note"
-                    size: Theme.iconSizeMedium
+                    size: 18
                     color: root.isMuted ? Theme.error : Theme.surfaceVariantText
                     visible: root.playingSounds.length === 0 || root.isMuted
                     anchors.verticalCenter: parent.verticalCenter
