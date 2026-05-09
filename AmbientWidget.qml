@@ -25,6 +25,10 @@ PluginComponent {
         return url.endsWith("/") ? url.substring(0, url.length - 1) : url;
     }
 
+    function getIpcSocket(sound) {
+        return "/tmp/dms-ambient-" + sound + ".sock";
+    }
+
     // Sound definitions
     readonly property var sounds: [
         { name: "rain", icon: "water_drop" },
@@ -80,7 +84,7 @@ PluginComponent {
 
     function loadPreset(preset) {
         // First kill everything and wait for it to finish
-        Proc.runCommand("kill-for-preset", ["bash", "-c", killSoundCmd(".*")], (output, exitCode) => {
+        stopAll(() => {
             root.isMuted = false;
             root.masterVolume = preset.volume;
             root.playingSounds = preset.sounds.slice();
@@ -89,7 +93,7 @@ PluginComponent {
             for (var i = 0; i < root.playingSounds.length; i++) {
                 Proc.runCommand("play-" + root.playingSounds[i], ["bash", "-c", playSoundCmd(root.playingSounds[i])], null, 0);
             }
-        }, 0);
+        });
     }
 
     function deletePreset(index) {
@@ -112,19 +116,33 @@ PluginComponent {
     function playSoundCmd(sound) {
         var vol = root.isMuted ? 0 : root.masterVolume;
         var soundFile = pluginDir + "/sounds/" + sound + ".ogg";
-        return "mpv --no-video --no-config --loop=inf --volume=" + vol + " '" + soundFile + "' > /dev/null 2>&1";
+        var socket = getIpcSocket(sound);
+        return "mpv --no-video --no-config --loop=inf --volume=" + vol + " --input-ipc-server='" + socket + "' '" + soundFile + "' > /dev/null 2>&1";
     }
 
     function killSoundCmd(pattern) {
         return "pkill -f 'ambientSound/sounds/" + pattern + ".ogg'";
     }
 
+    function sendIpcCommand(socket, cmdJson) {
+        let cmd = "echo '" + JSON.stringify(cmdJson) + "' | socat - '" + socket + "'";
+        Proc.runCommand("ipc-cmd", ["bash", "-c", cmd], null, 0);
+    }
+
+    function updateAllVolumes() {
+        var vol = root.isMuted ? 0 : root.masterVolume;
+        for (var i = 0; i < playingSounds.length; i++) {
+            sendIpcCommand(getIpcSocket(playingSounds[i]), { "command": ["set_property", "volume", vol] });
+        }
+    }
+
     // Audio logic
     function toggleMute() {
         if (playingSounds.length === 0) return;
         isMuted = !isMuted;
-        restartAll();
+        updateAllVolumes();
     }
+    
     function toggleSound(sound) {
         var idx = playingSounds.indexOf(sound);
         var list = playingSounds.slice();
@@ -132,7 +150,8 @@ PluginComponent {
         if (idx >= 0) {
             list.splice(idx, 1);
             playingSounds = list;
-            Proc.runCommand("stop-" + sound, ["bash", "-c", killSoundCmd(sound)], null, 0);
+            var socket = getIpcSocket(sound);
+            Proc.runCommand("stop-" + sound, ["bash", "-c", killSoundCmd(sound) + "; rm -f " + socket], null, 0);
             if (list.length === 0) {
                 root.isMuted = false;
             }
@@ -143,18 +162,12 @@ PluginComponent {
         }
     }
 
-    function stopAll() {
+    function stopAll(callback) {
         playingSounds = [];
         isMuted = false;
-        Proc.runCommand("stop-all", ["bash", "-c", killSoundCmd(".*")], null, 0);
-    }
-
-    function restartAll() {
-        var toPlay = playingSounds.slice();
-        Proc.runCommand("kill-all", ["bash", "-c", killSoundCmd(".*")], (output, exitCode) => {
-            for (var i = 0; i < toPlay.length; i++) {
-                Proc.runCommand("play-" + toPlay[i], ["bash", "-c", playSoundCmd(toPlay[i])], null, 0);
-            }
+        let cmd = killSoundCmd(".*") + "; rm -f /tmp/dms-ambient-*.sock";
+        Proc.runCommand("stop-all", ["bash", "-c", cmd], (o, e) => {
+            if (callback) callback();
         }, 0);
     }
 
@@ -162,7 +175,7 @@ PluginComponent {
         var newVol = Math.min(100, Math.max(0, root.masterVolume + delta));
         if (newVol !== root.masterVolume) {
             root.masterVolume = newVol;
-            volumeDebounceTimer.restart();
+            updateAllVolumes();
         }
     }
 
@@ -172,13 +185,6 @@ PluginComponent {
     }
 
     // Timers
-    Timer {
-        id: volumeDebounceTimer
-        interval: 250
-        repeat: false
-        onTriggered: root.restartAll()
-    }
-
     Timer {
         id: autoStartTimer
         interval: 2000
@@ -334,7 +340,7 @@ PluginComponent {
                         onSliderValueChanged: v => {
                             root.masterVolume = v;
                             if (v > 0 && root.isMuted) root.isMuted = false;
-                            volumeDebounceTimer.restart();
+                            root.updateAllVolumes();
                         }
                         MouseArea {
                             anchors.fill: parent
@@ -345,7 +351,7 @@ PluginComponent {
                                 if (newVol !== root.masterVolume) {
                                     root.masterVolume = newVol;
                                     if (newVol > 0 && root.isMuted) root.isMuted = false;
-                                    volumeDebounceTimer.restart();
+                                    root.updateAllVolumes();
                                 }
                             }
                         }
@@ -362,14 +368,6 @@ PluginComponent {
                             anchors.fill: parent
                             cursorShape: root.playingSounds.length > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
                             onClicked: if (root.playingSounds.length > 0) root.stopAll()
-                        }
-                        
-                        MouseArea {
-                            id: maStop
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            hoverEnabled: true
-                            acceptedButtons: Qt.NoButton
                         }
                     }
                 }
