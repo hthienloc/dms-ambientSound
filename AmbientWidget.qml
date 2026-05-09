@@ -311,7 +311,7 @@ PluginComponent {
     popoutContent: Component {
         PopoutComponent {
             width: root.popoutWidth
-            headerText: "Ambient Sounds"
+            headerText: "Ambient Sound"
             detailsText: root.playingSounds.length > 0 ? root.playingSounds.length + " playing" : "Tap to play"
             showCloseButton: false
 
