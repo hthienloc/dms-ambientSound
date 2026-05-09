@@ -125,20 +125,24 @@ PluginComponent {
     }
 
     function sendIpcCommand(socket, cmdJson) {
-        let cmd = "echo '" + JSON.stringify(cmdJson) + "' | socat - '" + socket + "'";
+        let cmd = "echo '" + JSON.stringify(cmdJson) + "' | socat - 'UNIX-CONNECT:" + socket + "'";
         Proc.runCommand("ipc-cmd", ["bash", "-c", cmd], null, 0);
     }
 
     function updateAllVolumes() {
+        if (playingSounds.length === 0) return;
         var vol = root.isMuted ? 0 : root.masterVolume;
+        var cmdJson = JSON.stringify({ "command": ["set_property", "volume", vol] });
+        var fullCmd = "";
         for (var i = 0; i < playingSounds.length; i++) {
-            sendIpcCommand(getIpcSocket(playingSounds[i]), { "command": ["set_property", "volume", vol] });
+            var socket = getIpcSocket(playingSounds[i]);
+            fullCmd += "echo '" + cmdJson + "' | socat - 'UNIX-CONNECT:" + socket + "'; ";
         }
+        Proc.runCommand("update-volumes", ["bash", "-c", fullCmd], null, 0);
     }
 
     // Audio logic
     function toggleMute() {
-        if (playingSounds.length === 0) return;
         isMuted = !isMuted;
         updateAllVolumes();
     }
