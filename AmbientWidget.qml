@@ -57,6 +57,15 @@ PluginComponent {
         { label: "2h",   minutes: 120 }
     ]
 
+    // When Done options
+    readonly property var whenDoneOptions: [
+        { label: "Stop\nAll", value: "stopAll", icon: "stop" },
+        { label: "Mute", value: "mute", icon: "volume_off" },
+        { label: "Lock\nScreen", value: "lock", icon: "lock" },
+        { label: "Power\nOff", value: "powerOff", icon: "power_settings_new" }
+    ]
+    property string whenDoneAction: pluginData.whenDoneAction || "stopAll"
+
     // Audio state
     property var playingSounds: []
     property var soundVolumes: pluginData.soundVolumes || ({})
@@ -226,9 +235,27 @@ PluginComponent {
         id: sleepTimer
         property int remainingTime: 0
         onTriggered: {
-            root.stopAll();
+            executeWhenDone();
             remainingTime = 0;
         }
+    }
+
+    function executeWhenDone() {
+        if (whenDoneAction === "stopAll") {
+            root.stopAll();
+        } else if (whenDoneAction === "mute") {
+            root.isMuted = true;
+            root.updateAllVolumes();
+        } else if (whenDoneAction === "lock") {
+            Proc.runCommand("lock-screen", ["bash", "-c", "loginctl lock-session"], null, 0);
+        } else if (whenDoneAction === "powerOff") {
+            Proc.runCommand("power-off", ["bash", "-c", "systemctl suspend"], null, 0);
+        }
+    }
+
+    function setWhenDoneAction(action) {
+        whenDoneAction = action;
+        pluginService.savePluginData(root.pluginId, "whenDoneAction", action);
     }
 
     Timer {
@@ -479,29 +506,26 @@ PluginComponent {
                     width: parent.width
                     spacing: 4
 
-                    Row {
+                    Flow {
                         width: parent.width
                         spacing: 4
-                        visible: pluginData.enableSleepTimer ?? true
 
                         DankIcon {
                             name: "timer"
                             size: 18
                             color: sleepTimer.running ? Theme.primary : Theme.surfaceVariantText
-                            anchors.verticalCenter: parent.verticalCenter
                         }
                         StyledText {
                             text: sleepTimer.running ? Math.ceil(sleepTimer.remainingTime / 60000) + " min left" : ""
                             font.pixelSize: Theme.fontSizeSmall
                             color: sleepTimer.running ? Theme.primary : Theme.surfaceVariantText
-                            anchors.verticalCenter: parent.verticalCenter
                         }
 
                         Repeater {
                             model: root.sleepPresets
                             delegate: DankButton {
                                 text: modelData.label
-                                width: 48; height: 24
+                                width: 36; height: 24
                                 visible: !sleepTimer.running
                                 onClicked: {
                                     var ms = modelData.minutes * 60 * 1000;
@@ -514,11 +538,54 @@ PluginComponent {
 
                         DankButton {
                             text: "Off"
-                            width: 48; height: 24
-                            backgroundColor: Theme.errorContainer
-                            textColor: Theme.error
+                            width: 36; height: 24
                             visible: sleepTimer.running
                             onClicked: sleepTimer.stop()
+                        }
+                    }
+
+                    Column {
+                        width: parent.width
+                        spacing: 4
+
+                        StyledText {
+                            text: "When Done:"
+                            font.pixelSize: Theme.fontSizeSmall
+                            font.weight: Font.Bold
+                            color: Theme.surfaceVariantText
+                        }
+
+                        Flow {
+                            width: parent.width - 8
+                            spacing: 8
+
+                            Repeater {
+                                model: root.whenDoneOptions
+                                delegate: Rectangle {
+                                    width: 80; height: 40
+                                    radius: Theme.cornerRadius
+                                    color: root.whenDoneAction === modelData.value ? Theme.primary : Theme.surfaceContainerHigh
+                                    border.width: root.whenDoneAction === modelData.value ? 0 : 1
+                                    border.color: Theme.surfaceVariant
+                                    clip: true
+
+                                    StyledText {
+                                        text: modelData.label
+                                        font.pixelSize: Theme.fontSizeSmall
+                                        color: root.whenDoneAction === modelData.value ? Theme.onPrimary : Theme.surfaceText
+                                        width: parent.width
+                                        height: parent.height
+                                        verticalAlignment: Text.AlignVCenter
+                                        horizontalAlignment: Text.AlignHCenter
+                                    }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: root.setWhenDoneAction(modelData.value)
+                                    }
+                                }
+                            }
                         }
                     }
 
