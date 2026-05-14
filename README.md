@@ -6,7 +6,7 @@ Play ambient sounds for focus and relaxation.
 
 ## Install
 
-[<kbd>Install Now</kbd>](dms://plugin/install/ambient-sound)
+[**Install Now**](dms://plugin/install/ambient-sound)
 
 Or manually:
 ```bash
