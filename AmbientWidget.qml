@@ -59,8 +59,21 @@ PluginComponent {
 
     // Audio state
     property var playingSounds: []
+    property var soundVolumes: pluginData.soundVolumes || ({})
     property int masterVolume: pluginData.defaultVolume !== undefined ? parseInt(pluginData.defaultVolume) : 75
     property bool isMuted: false
+
+    function getEffectiveVolume(sound) {
+        var individual = soundVolumes[sound] !== undefined ? soundVolumes[sound] : 100;
+        return (individual / 100) * (root.isMuted ? 0 : root.masterVolume);
+    }
+
+    function setSoundVolume(sound, vol) {
+        soundVolumes[sound] = vol;
+        pluginService.savePluginData(root.pluginId, "soundVolumes", soundVolumes);
+        var socket = getIpcSocket(sound);
+        sendIpcCommand(socket, { "command": ["set_property", "volume", getEffectiveVolume(sound)] });
+    }
 
     // Preset state
     property var presets: pluginData.presets || []
@@ -131,11 +144,12 @@ PluginComponent {
 
     function updateAllVolumes() {
         if (playingSounds.length === 0) return;
-        var vol = root.isMuted ? 0 : root.masterVolume;
-        var cmdJson = JSON.stringify({ "command": ["set_property", "volume", vol] });
         var fullCmd = "";
         for (var i = 0; i < playingSounds.length; i++) {
-            var socket = getIpcSocket(playingSounds[i]);
+            var sound = playingSounds[i];
+            var vol = getEffectiveVolume(sound);
+            var cmdJson = JSON.stringify({ "command": ["set_property", "volume", vol] });
+            var socket = getIpcSocket(sound);
             fullCmd += "echo '" + cmdJson + "' | socat - 'UNIX-CONNECT:" + socket + "'; ";
         }
         Proc.runCommand("update-volumes", ["bash", "-c", fullCmd], null, 0);
@@ -390,6 +404,9 @@ PluginComponent {
                             radius: Theme.cornerRadius
                             color: root.playingSounds.indexOf(modelData.name) >= 0 ? Theme.primary : Theme.surfaceContainerHigh
 
+                            property int individualVol: root.soundVolumes[modelData.name] !== undefined ? root.soundVolumes[modelData.name] : 100
+                            opacity: root.playingSounds.indexOf(modelData.name) >= 0 ? (0.5 + individualVol / 200) : 1.0
+
                             Column {
                                 anchors.centerIn: parent
                                 spacing: 2
@@ -411,6 +428,14 @@ PluginComponent {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: root.toggleSound(modelData.name)
+                                onWheel: (wheel) => {
+                                    if (root.playingSounds.indexOf(modelData.name) >= 0) {
+                                        var current = root.soundVolumes[modelData.name] !== undefined ? root.soundVolumes[modelData.name] : 100;
+                                        var delta = wheel.angleDelta.y > 0 ? 10 : -10;
+                                        var newVol = Math.min(100, Math.max(0, current + delta));
+                                        root.setSoundVolume(modelData.name, newVol);
+                                    }
+                                }
                             }
                         }
                     }
@@ -584,6 +609,16 @@ PluginComponent {
                         color: Theme.surfaceVariantText
                         anchors.horizontalCenter: parent.horizontalCenter
                         visible: root.playingSounds.length > 0 && (pluginData.showReminderText ?? true)
+                    }
+
+                    StyledText {
+                        text: "Scroll on a sound tile to adjust its volume"
+                        font.pixelSize: Theme.fontSizeSmall
+                        color: Theme.surfaceVariantText
+                        width: parent.width - 32
+                        wrapMode: Text.WordWrap
+                        horizontalAlignment: Text.AlignHCenter
+                        visible: root.playingSounds.length > 0
                     }
                 }
             }
