@@ -7,7 +7,7 @@ Play ambient sounds for focus and relaxation.
 ## Install
 
 ```
-dms://plugin/install/ambient-sound
+dms://plugin/install/ambientSound
 ```
 
 Or manually:
