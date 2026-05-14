@@ -434,11 +434,92 @@ PluginComponent {
                         color: root.playingSounds.length > 0 ? Theme.error : Theme.surfaceVariantText
                         anchors.verticalCenter: parent.verticalCenter
                         opacity: root.playingSounds.length > 0 ? 1.0 : 0.5
-                        
+
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: root.playingSounds.length > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
                             onClicked: if (root.playingSounds.length > 0) root.stopAll()
+                        }
+                    }
+                }
+
+                // Presets section - moved up for quick access
+                Column {
+                    width: parent.width
+                    spacing: 4
+                    visible: root.presets.length > 0
+
+                    StyledText {
+                        text: "Your Presets"
+                        font.pixelSize: Theme.fontSizeSmall
+                        font.weight: Font.Bold
+                        color: Theme.surfaceVariantText
+                    }
+
+                    Flow {
+                        width: parent.width
+                        spacing: 4
+                        Repeater {
+                            model: root.presets
+                            delegate: Item {
+                                width: (parent.width - 4) / 2
+                                height: 32
+
+                                DankButton {
+                                    id: presetButton
+                                    text: modelData.name
+                                    width: parent.width - 48
+                                    height: parent.height
+                                    visible: root.editingIndex !== index
+                                    onClicked: root.loadPreset(modelData)
+                                }
+
+                                DankTextField {
+                                    id: editField
+                                    width: parent.width - 48
+                                    height: parent.height
+                                    text: modelData.name
+                                    visible: root.editingIndex === index
+                                    onEditingFinished: root.renamePreset(index, text)
+                                    Component.onCompleted: {
+                                        if (root.editingIndex === index) forceActiveFocus();
+                                    }
+                                }
+
+                                DankIcon {
+                                    name: root.editingIndex === index ? "check" : "edit"
+                                    size: 16
+                                    anchors.right: deleteIcon.left
+                                    anchors.rightMargin: 4
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    color: Theme.surfaceVariantText
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            if (root.editingIndex === index) {
+                                                root.renamePreset(index, editField.text);
+                                            } else {
+                                                root.editingIndex = index;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                DankIcon {
+                                    id: deleteIcon
+                                    name: "close"
+                                    size: 16
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    color: Theme.error
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: root.deletePreset(index)
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -609,87 +690,6 @@ PluginComponent {
                                         anchors.fill: parent
                                         cursorShape: Qt.PointingHandCursor
                                         onClicked: root.toggleWhenDoneAction(modelData.value)
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // Presets area
-                    Column {
-                        width: parent.width
-                        spacing: 4
-                        visible: root.presets.length > 0
-
-                        StyledText {
-                            text: "Your Presets"
-                            font.pixelSize: Theme.fontSizeSmall
-                            font.weight: Font.Bold
-                            color: Theme.surfaceVariantText
-                        }
-
-                        Flow {
-                            width: parent.width
-                            spacing: 4
-                            Repeater {
-                                model: root.presets
-                                delegate: Item {
-                                    width: (parent.width - 4) / 2
-                                    height: 32
-
-                                    DankButton {
-                                        id: presetButton
-                                        text: modelData.name
-                                        width: parent.width - 48
-                                        height: parent.height
-                                        visible: root.editingIndex !== index
-                                        onClicked: root.loadPreset(modelData)
-                                    }
-
-                                    DankTextField {
-                                        id: editField
-                                        width: parent.width - 48
-                                        height: parent.height
-                                        text: modelData.name
-                                        visible: root.editingIndex === index
-                                        onEditingFinished: root.renamePreset(index, text)
-                                        Component.onCompleted: {
-                                            if (root.editingIndex === index) forceActiveFocus();
-                                        }
-                                    }
-
-                                    DankIcon {
-                                        name: root.editingIndex === index ? "check" : "edit"
-                                        size: 16
-                                        anchors.right: deleteIcon.left
-                                        anchors.rightMargin: 4
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        color: Theme.surfaceVariantText
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                if (root.editingIndex === index) {
-                                                    root.renamePreset(index, editField.text);
-                                                } else {
-                                                    root.editingIndex = index;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    
-                                    DankIcon {
-                                        id: deleteIcon
-                                        name: "close"
-                                        size: 16
-                                        anchors.right: parent.right
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        color: Theme.error
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: root.deletePreset(index)
-                                        }
                                     }
                                 }
                             }
