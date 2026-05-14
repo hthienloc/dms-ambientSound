@@ -59,12 +59,40 @@ PluginComponent {
 
     // When Done options
     readonly property var whenDoneOptions: [
-        { label: "Stop\nAll", value: "stopAll", icon: "stop" },
-        { label: "Mute", value: "mute", icon: "volume_off" },
-        { label: "Lock\nScreen", value: "lock", icon: "lock" },
-        { label: "Power\nOff", value: "powerOff", icon: "power_settings_new" }
+        { label: "Stop\nAll", value: "stopAll" },
+        { label: "Mute", value: "mute" },
+        { label: "Lock\nScreen", value: "lock" },
+        { label: "Power\nOff", value: "powerOff" }
     ]
-    property string whenDoneAction: pluginData.whenDoneAction || "stopAll"
+    property var whenDoneActions: pluginData.whenDoneActions || ["stopAll"]
+
+    function isWhenDoneSelected(value) {
+        return whenDoneActions.indexOf(value) >= 0;
+    }
+
+    function toggleWhenDoneAction(value) {
+        var idx = whenDoneActions.indexOf(value);
+        var newActions = whenDoneActions.slice();
+
+        if (value === "stopAll" || value === "mute") {
+            newActions = newActions.filter(a => a !== "stopAll" && a !== "mute");
+            if (idx < 0) newActions.push(value);
+        } else if (value === "lock" || value === "powerOff") {
+            newActions = newActions.filter(a => a !== "lock" && a !== "powerOff");
+            if (idx < 0) newActions.push(value);
+        } else {
+            if (idx >= 0) {
+                if (whenDoneActions.length > 1) {
+                    newActions.splice(idx, 1);
+                }
+            } else {
+                newActions.push(value);
+            }
+        }
+
+        whenDoneActions = newActions;
+        pluginService.savePluginData(root.pluginId, "whenDoneActions", newActions);
+    }
 
     // Audio state
     property var playingSounds: []
@@ -241,21 +269,19 @@ PluginComponent {
     }
 
     function executeWhenDone() {
-        if (whenDoneAction === "stopAll") {
-            root.stopAll();
-        } else if (whenDoneAction === "mute") {
-            root.isMuted = true;
-            root.updateAllVolumes();
-        } else if (whenDoneAction === "lock") {
-            Proc.runCommand("lock-screen", ["bash", "-c", "loginctl lock-session"], null, 0);
-        } else if (whenDoneAction === "powerOff") {
-            Proc.runCommand("power-off", ["bash", "-c", "systemctl suspend"], null, 0);
+        for (var i = 0; i < whenDoneActions.length; i++) {
+            var action = whenDoneActions[i];
+            if (action === "stopAll") {
+                root.stopAll();
+            } else if (action === "mute") {
+                root.isMuted = true;
+                root.updateAllVolumes();
+            } else if (action === "lock") {
+                Proc.runCommand("lock-screen", ["bash", "-c", "loginctl lock-session"], null, 0);
+            } else if (action === "powerOff") {
+                Proc.runCommand("power-off", ["bash", "-c", "systemctl suspend"], null, 0);
+            }
         }
-    }
-
-    function setWhenDoneAction(action) {
-        whenDoneAction = action;
-        pluginService.savePluginData(root.pluginId, "whenDoneAction", action);
     }
 
     Timer {
@@ -564,15 +590,15 @@ PluginComponent {
                                 delegate: Rectangle {
                                     width: 80; height: 40
                                     radius: Theme.cornerRadius
-                                    color: root.whenDoneAction === modelData.value ? Theme.primary : Theme.surfaceContainerHigh
-                                    border.width: root.whenDoneAction === modelData.value ? 0 : 1
+                                    color: root.isWhenDoneSelected(modelData.value) ? Theme.primary : Theme.surfaceContainerHigh
+                                    border.width: root.isWhenDoneSelected(modelData.value) ? 0 : 1
                                     border.color: Theme.surfaceVariant
                                     clip: true
 
                                     StyledText {
                                         text: modelData.label
                                         font.pixelSize: Theme.fontSizeSmall
-                                        color: root.whenDoneAction === modelData.value ? Theme.onPrimary : Theme.surfaceText
+                                        color: root.isWhenDoneSelected(modelData.value) ? Theme.onPrimary : Theme.surfaceText
                                         width: parent.width
                                         height: parent.height
                                         verticalAlignment: Text.AlignVCenter
@@ -582,7 +608,7 @@ PluginComponent {
                                     MouseArea {
                                         anchors.fill: parent
                                         cursorShape: Qt.PointingHandCursor
-                                        onClicked: root.setWhenDoneAction(modelData.value)
+                                        onClicked: root.toggleWhenDoneAction(modelData.value)
                                     }
                                 }
                             }
