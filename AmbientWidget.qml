@@ -537,27 +537,17 @@ PluginComponent {
                     width: parent.width
                     spacing: 4
 
-                    Flow {
+                    Row {
                         width: parent.width
                         spacing: 4
-
-                        DankIcon {
-                            name: "timer"
-                            size: 18
-                            color: sleepTimer.running ? Theme.primary : Theme.surfaceVariantText
-                        }
-                        StyledText {
-                            text: sleepTimer.running ? Math.ceil(sleepTimer.remainingTime / 60000) + " min left" : ""
-                            font.pixelSize: Theme.fontSizeSmall
-                            color: sleepTimer.running ? Theme.primary : Theme.surfaceVariantText
-                        }
+                        visible: !sleepTimer.running
 
                         Repeater {
                             model: root.sleepPresets
                             delegate: DankButton {
                                 text: modelData.label
-                                width: 36; height: 24
-                                visible: !sleepTimer.running
+                                width: (parent.width - (parent.spacing * 5)) / 6
+                                height: 32
                                 onClicked: {
                                     var ms = modelData.minutes * 60 * 1000;
                                     sleepTimer.interval = ms;
@@ -566,11 +556,26 @@ PluginComponent {
                                 }
                             }
                         }
+                    }
+
+                    Row {
+                        width: parent.width
+                        spacing: 8
+                        visible: sleepTimer.running
+
+                        StyledText {
+                            text: "Sleep timer: " + Math.ceil(sleepTimer.remainingTime / 60000) + " minutes left"
+                            font.pixelSize: Theme.fontSizeSmall
+                            color: Theme.primary
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width - 80 - parent.spacing
+                        }
 
                         DankButton {
-                            text: "Off"
-                            width: 36; height: 24
-                            visible: sleepTimer.running
+                            text: "Cancel"
+                            width: 80; height: 32
+                            backgroundColor: Theme.surfaceContainerHighest
+                            textColor: Theme.surfaceText
                             onClicked: sleepTimer.stop()
                         }
                     }
