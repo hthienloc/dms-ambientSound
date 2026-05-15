@@ -4,6 +4,7 @@ import qs.Common
 import qs.Services
 import qs.Widgets
 import qs.Modules.Plugins
+import "./components"
 
 PluginSettings {
     id: root
@@ -44,163 +45,100 @@ PluginSettings {
     Component.onCompleted: updateAutoStartStates()
     onSettingChanged: updateAutoStartStates()
 
-    StyledText {
-        width: parent.width
-        text: "Ambient Sound Settings"
-        font.pixelSize: Theme.fontSizeLarge
-        font.weight: Font.Bold
-        color: Theme.primary
+    PluginHeader {
+        title: "Ambient Sound Settings"
     }
 
-    StyledRect {
-        width: parent.width
-        height: audioColumn.implicitHeight + Theme.spacingL * 2
-        radius: Theme.cornerRadius
-        color: Theme.surfaceContainer
+    SettingsCard {
+        SectionTitle { text: "Audio" }
 
-        Column {
-            id: audioColumn
-            anchors.fill: parent
-            anchors.margins: Theme.spacingL
-            spacing: Theme.spacingM
-
-            StyledText {
-                text: "Audio"
-                font.pixelSize: Theme.fontSizeMedium
-                font.weight: Font.Medium
-                color: Theme.surfaceText
-            }
-
-            SliderSetting {
-                settingKey: "defaultVolume"
-                label: "Default Volume"
-                description: "Initial volume when starting."
-                minimum: 0
-                maximum: 100
-                unit: "%"
-                defaultValue: 75
-            }
+        SliderSetting {
+            settingKey: "defaultVolume"
+            label: "Default Volume"
+            description: "Initial volume when starting."
+            minimum: 0
+            maximum: 100
+            unit: "%"
+            defaultValue: 75
+        }
+        
+        ToggleSetting {
+            settingKey: "showReminderText"
+            label: "Show Reminder Text"
+            description: "Display 'Scroll on a sound tile...' help text."
+            defaultValue: true
         }
     }
 
-    StyledRect {
-        width: parent.width
-        height: timerColumn.implicitHeight + Theme.spacingL * 2
-        radius: Theme.cornerRadius
-        color: Theme.surfaceContainer
+    SettingsCard {
+        SectionTitle { text: "Sleep Timer" }
 
-        Column {
-            id: timerColumn
-            anchors.fill: parent
-            anchors.margins: Theme.spacingL
-            spacing: Theme.spacingM
+        ToggleSetting {
+            settingKey: "enableSleepTimer"
+            label: "Enable Sleep Timer"
+            description: "Stop audio automatically after set duration."
+            defaultValue: true
+        }
 
-            StyledText {
-                text: "Sleep Timer"
-                font.pixelSize: Theme.fontSizeMedium
-                font.weight: Font.Medium
-                color: Theme.surfaceText
-            }
-
-            ToggleSetting {
-                settingKey: "enableSleepTimer"
-                label: "Enable Sleep Timer"
-                description: "Show sleep timer controls."
-                defaultValue: true
-            }
-
-            ToggleSetting {
-                settingKey: "showHints"
-                label: "Show Hints"
-                description: "Display helpful usage tips and shortcuts at the bottom of the popout."
-                defaultValue: true
-            }
-
-            SelectionSetting {
-                settingKey: "sleepTimerDuration"
-                label: "Default Duration"
-                description: "Default duration when starting timer."
-                options: [
-                    { label: "Off", value: "0" },
-                    { label: "15 minutes", value: "15" },
-                    { label: "30 minutes", value: "30" },
-                    { label: "45 minutes", value: "45" },
-                    { label: "1 hour", value: "60" },
-                    { label: "1.5 hours", value: "90" },
-                    { label: "2 hours", value: "120" }
-                ]
-                defaultValue: "0"
-                visible: root.loadValue("enableSleepTimer", true)
-            }
+        SelectionSetting {
+            settingKey: "defaultTimer"
+            label: "Default Duration"
+            description: "Default countdown when timer is enabled."
+            options: [
+                { label: "15 minutes", value: "15" },
+                { label: "30 minutes", value: "30" },
+                { label: "45 minutes", value: "45" },
+                { label: "1 hour", value: "60" },
+                { label: "1.5 hours", value: "90" },
+                { label: "2 hours", value: "120" }
+            ]
+            defaultValue: "30"
+            visible: pluginData.enableSleepTimer ?? true
         }
     }
 
-    StyledRect {
-        width: parent.width
-        height: autoColumn.implicitHeight + Theme.spacingL * 2
-        radius: Theme.cornerRadius
-        color: Theme.surfaceContainer
+    SettingsCard {
+        SectionTitle { text: "Auto-start Sounds" }
+        InfoText { text: "Select sounds to play automatically when you log in." }
 
-        Column {
-            id: autoColumn
-            anchors.fill: parent
-            anchors.margins: Theme.spacingL
-            spacing: Theme.spacingM
+        Flow {
+            id: autoStartFlow
+            width: parent.width
+            spacing: 8
 
-            StyledText {
-                text: "Auto-Start on Login"
-                font.pixelSize: Theme.fontSizeMedium
-                font.weight: Font.Medium
-                color: Theme.surfaceText
-            }
-            
-            StyledText {
-                text: "Select sounds to play automatically when you log in."
-                font.pixelSize: Theme.fontSizeSmall
-                color: Theme.surfaceVariantText
-                wrapMode: Text.WordWrap
-                width: parent.width
-            }
-
-            Flow {
-                id: autoStartFlow
-                width: parent.width
-                spacing: 8
-
-                Repeater {
-                    model: root.sounds
-                    delegate: Rectangle {
-                        width: (autoStartFlow.width - 16) / 3
-                        height: 44
-                        radius: Theme.cornerRadius
-                        
-                        readonly property string sKey: root.autoStartKey(modelData.name)
-                        readonly property bool isChecked: root.autoStartStates[sKey] ?? false
-                        
-                        color: isChecked ? Theme.primary : Theme.surfaceContainerHigh
-                        
-                        Row {
-                            anchors.centerIn: parent
-                            spacing: 6
-                            DankIcon {
-                                name: modelData.icon
-                                size: 18
-                                color: isChecked ? Theme.onPrimary : Theme.surfaceVariantText
-                            }
-                            StyledText {
-                                text: modelData.name.replace("-", " ")
-                                font.pixelSize: Theme.fontSizeSmall
-                                font.weight: isChecked ? Font.Bold : Font.Normal
-                                color: isChecked ? Theme.onPrimary : Theme.surfaceText
-                            }
+            Repeater {
+                model: root.sounds
+                delegate: Rectangle {
+                    width: (autoStartFlow.width - 16) / 3
+                    height: 44
+                    radius: Theme.cornerRadius
+                    
+                    readonly property string sKey: root.autoStartKey(modelData.name)
+                    readonly property bool isChecked: root.autoStartStates[sKey] ?? false
+                    
+                    color: isChecked ? Theme.primary : Theme.surfaceContainerHigh
+                    
+                    Row {
+                        anchors.centerIn: parent
+                        spacing: 6
+                        DankIcon {
+                            name: modelData.icon
+                            size: 18
+                            color: isChecked ? Theme.onPrimary : Theme.surfaceVariantText
                         }
+                        StyledText {
+                            text: modelData.name.replace("-", " ")
+                            font.pixelSize: Theme.fontSizeSmall
+                            font.weight: isChecked ? Font.Bold : Font.Normal
+                            color: isChecked ? Theme.onPrimary : Theme.surfaceText
+                        }
+                    }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                root.saveValue(sKey, !isChecked);
-                            }
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            root.saveValue(sKey, !isChecked);
                         }
                     }
                 }
