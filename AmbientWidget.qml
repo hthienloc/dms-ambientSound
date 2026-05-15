@@ -529,6 +529,7 @@ PluginComponent {
                         title: "Save Preset"
                         borderColor: Theme.primary
                         borderWidth: 1
+                        textColor: Theme.primary
                         onClicked: root.savePreset()
                     }
                 }
