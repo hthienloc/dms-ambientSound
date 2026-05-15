@@ -376,7 +376,11 @@ PluginComponent {
 
     // Popout dimensions
     popoutWidth: 350
-    popoutHeight: root.presets.length > 0 ? 540 : 460
+    popoutHeight: {
+        let baseHeight = root.presets.length > 0 ? 540 : 460;
+        let hintsActive = root.showHints && root.playingSounds.length > 0;
+        return hintsActive ? baseHeight : baseHeight - 65;
+    }
 
     // Popout content
     popoutContent: Component {
