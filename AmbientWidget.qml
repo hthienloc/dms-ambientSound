@@ -528,6 +528,7 @@ PluginComponent {
                         height: root.cellHeight
                         iconName: "bookmark_add"
                         title: "Save Preset"
+                        titleFontSize: 12
                         textColor: Theme.primary
                         onClicked: root.savePreset()
                     }
@@ -593,13 +594,13 @@ PluginComponent {
                         }
 
                         Flow {
-                            width: parent.width - 8
-                            spacing: 8
+                            width: parent.width
+                            spacing: 4
 
                             Repeater {
                                 model: root.whenDoneOptions
                                 delegate: Rectangle {
-                                    width: 78; height: 36
+                                    width: (parent.width - (parent.spacing * 3)) / 4; height: 36
                                     radius: Theme.cornerRadius
                                     color: root.isWhenDoneSelected(modelData.value) ? Theme.primary : Theme.surfaceContainerHigh
                                     border.width: root.isWhenDoneSelected(modelData.value) ? 0 : 1
