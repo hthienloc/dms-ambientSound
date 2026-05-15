@@ -4,7 +4,7 @@ import qs.Common
 import qs.Services
 import qs.Widgets
 import qs.Modules.Plugins
-import "./components"
+import "../dms-common"
 
 PluginSettings {
     id: root

@@ -37,3 +37,5 @@ git clone https://github.com/hthienloc/dms-ambient-sound ~/.config/DankMaterialS
 ## License
 
 GPL-3.0
+## Dependencies
+- Requires [dms-common](https://github.com/hthienloc/dms-common) to be installed in the plugins directory.
