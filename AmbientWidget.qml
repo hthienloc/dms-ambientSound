@@ -10,6 +10,7 @@ import "../dms-common"
 PluginComponent {
     id: root
     readonly property bool showHints: pluginData.showHints ?? true
+    readonly property bool showReminderText: pluginData.showReminderText ?? true
 
 
     // Right-click action on pill
@@ -377,9 +378,13 @@ PluginComponent {
     // Popout dimensions
     popoutWidth: 350
     popoutHeight: {
-        let baseHeight = root.presets.length > 0 ? 540 : 460;
-        let hintsActive = root.showHints && root.playingSounds.length > 0;
-        return hintsActive ? baseHeight : baseHeight - 65;
+        let h = 330; // Base: Header + Audio + Grid + Timer + When Done
+        if (root.presets.length > 0) h += 65;
+        if (root.showHints && root.playingSounds.length > 0) {
+            h += 30; // First hint
+            if (root.showReminderText) h += 20; // Second hint
+        }
+        return h;
     }
 
     // Popout content
@@ -640,6 +645,7 @@ PluginComponent {
                             text: "Right-click bar icon to quickly mute/unmute."
                         }
                         HintItem {
+                            visible: root.showReminderText
                             icon: "mouse"
                             text: "Scroll on a sound tile to adjust its individual volume."
                         }
