@@ -391,60 +391,18 @@ PluginComponent {
                 spacing: 8
 
                 // Volume & Control bar
-                Row {
-                    width: parent.width
-                    spacing: Theme.spacingS
-                    DankIcon {
-                        name: root.isMuted ? "volume_off" : "volume_up"
-                        size: 22
-                        color: root.isMuted ? Theme.error : (root.playingSounds.length > 0 ? Theme.primary : Theme.surfaceVariantText)
-                        anchors.verticalCenter: parent.verticalCenter
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.toggleMute()
-                        }
+                MediaHeader {
+                    volume: root.masterVolume / 100
+                    isMuted: root.isMuted
+                    showStopButton: true
+                    stopButtonEnabled: root.playingSounds.length > 0
+                    onVolumeChanged: v => {
+                        root.masterVolume = v * 100;
+                        if (v > 0 && root.isMuted) root.isMuted = false;
+                        root.updateAllVolumes();
                     }
-                    DankSlider {
-                        id: volumeSlider
-                        value: root.masterVolume
-                        width: parent.width - 80
-                        minimum: 0; maximum: 100
-                        centerMinimum: false; unit: "%"; showValue: true
-                        wheelEnabled: false
-                        onSliderValueChanged: v => {
-                            root.masterVolume = v;
-                            if (v > 0 && root.isMuted) root.isMuted = false;
-                            root.updateAllVolumes();
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            acceptedButtons: Qt.NoButton
-                            onWheel: (wheel) => {
-                                var delta = wheel.angleDelta.y > 0 ? 5 : -5;
-                                var newVol = Math.min(100, Math.max(0, root.masterVolume + delta));
-                                if (newVol !== root.masterVolume) {
-                                    root.masterVolume = newVol;
-                                    if (newVol > 0 && root.isMuted) root.isMuted = false;
-                                    root.updateAllVolumes();
-                                }
-                            }
-                        }
-                    }
-                    
-                    DankIcon {
-                        name: "cancel"
-                        size: 24
-                        color: root.playingSounds.length > 0 ? Theme.error : Theme.surfaceVariantText
-                        anchors.verticalCenter: parent.verticalCenter
-                        opacity: root.playingSounds.length > 0 ? 1.0 : 0.5
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: root.playingSounds.length > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
-                            onClicked: if (root.playingSounds.length > 0) root.stopAll()
-                        }
-                    }
+                    onMuteToggled: root.toggleMute()
+                    onStopClicked: root.stopAll()
                 }
 
                 // Presets section - moved up for quick access
@@ -536,79 +494,42 @@ PluginComponent {
                     // 14 Sound Tiles
                     Repeater {
                         model: root.sounds
-                        delegate: Rectangle {
+                        delegate: ActionTile {
                             width: root.cellWidth
                             height: root.cellHeight
-                            radius: Theme.cornerRadius
-                            color: root.playingSounds.indexOf(modelData.name) >= 0 ? Theme.primary : Theme.surfaceContainerHigh
-
-                            property int individualVol: root.soundVolumes[modelData.name] !== undefined ? root.soundVolumes[modelData.name] : 100
-                            opacity: root.playingSounds.indexOf(modelData.name) >= 0 ? (0.5 + individualVol / 200) : 1.0
-
-                            Column {
-                                anchors.centerIn: parent
-                                spacing: 2
-                                DankIcon {
-                                    name: modelData.icon
-                                    size: root.iconSize
-                                    color: root.playingSounds.indexOf(modelData.name) >= 0 ? Theme.onPrimary : Theme.surfaceText
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                }
-                                StyledText {
-                                    text: modelData.name.replace("-", " ")
-                                    font.pixelSize: root.fontSize
-                                    font.weight: Font.Medium
-                                    color: root.playingSounds.indexOf(modelData.name) >= 0 ? Theme.onPrimary : Theme.surfaceText
-                                    anchors.horizontalCenter: parent.horizontalCenter
+                            iconName: modelData.icon
+                            title: modelData.name.replace("-", " ")
+                            subtitle: {
+                                var vol = root.soundVolumes[modelData.name] !== undefined ? root.soundVolumes[modelData.name] : 100;
+                                return vol < 100 ? vol + "%" : ""
+                            }
+                            active: root.playingSounds.indexOf(modelData.name) >= 0
+                            
+                            onClicked: root.toggleSound(modelData.name)
+                            onScrollUp: {
+                                if (active) {
+                                    var current = root.soundVolumes[modelData.name] !== undefined ? root.soundVolumes[modelData.name] : 100;
+                                    root.setSoundVolume(modelData.name, Math.min(100, current + 10));
                                 }
                             }
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: root.toggleSound(modelData.name)
-                                onWheel: (wheel) => {
-                                    if (root.playingSounds.indexOf(modelData.name) >= 0) {
-                                        var current = root.soundVolumes[modelData.name] !== undefined ? root.soundVolumes[modelData.name] : 100;
-                                        var delta = wheel.angleDelta.y > 0 ? 10 : -10;
-                                        var newVol = Math.min(100, Math.max(0, current + delta));
-                                        root.setSoundVolume(modelData.name, newVol);
-                                    }
+                            onScrollDown: {
+                                if (active) {
+                                    var current = root.soundVolumes[modelData.name] !== undefined ? root.soundVolumes[modelData.name] : 100;
+                                    root.setSoundVolume(modelData.name, Math.max(0, current - 10));
                                 }
                             }
                         }
                     }
 
                     // 15th Slot: Save Preset Button
-                    Rectangle {
+                    ActionTile {
                         width: root.cellWidth
                         height: root.cellHeight
-                        radius: Theme.cornerRadius
-                        color: Theme.surfaceContainerHigh
-                        border.width: 1
-                        border.color: Theme.surfaceVariant
-
-                        Column {
-                            anchors.centerIn: parent
-                            spacing: 2
-                            DankIcon {
-                                name: "bookmark_add"
-                                size: root.iconSize
-                                color: Theme.primary
-                                anchors.horizontalCenter: parent.horizontalCenter
-                            }
-                            StyledText {
-                                text: "Save Preset"
-                                font.pixelSize: root.fontSize
-                                font.weight: Font.Medium
-                                color: Theme.primary
-                                anchors.horizontalCenter: parent.horizontalCenter
-                            }
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.savePreset()
-                        }
+                        iconName: "bookmark_add"
+                        title: "Save Preset"
+                        active: false
+                        activeColor: "transparent"
+                        onClicked: root.savePreset()
                     }
                 }
 
