@@ -17,7 +17,7 @@ PluginComponent {
 
     // Layout constants
     readonly property real cellWidth: (root.popoutWidth - (root.gridSpacing * 2) - 16) / 3
-    readonly property real cellHeight: 80
+    readonly property real cellHeight: 95
     readonly property real iconSize: 28
     readonly property real fontSize: 14
     readonly property int gridSpacing: 8
@@ -375,8 +375,8 @@ PluginComponent {
     verticalBarPill: horizontalBarPill
 
     // Popout dimensions
-    popoutWidth: 380
-    popoutHeight: root.presets.length > 0 ? 550 : 470
+    popoutWidth: 440
+    popoutHeight: root.presets.length > 0 ? 620 : 540
 
     // Popout content
     popoutContent: Component {
@@ -593,7 +593,7 @@ PluginComponent {
                             Repeater {
                                 model: root.whenDoneOptions
                                 delegate: Rectangle {
-                                    width: 80; height: 40
+                                    width: 92; height: 40
                                     radius: Theme.cornerRadius
                                     color: root.isWhenDoneSelected(modelData.value) ? Theme.primary : Theme.surfaceContainerHigh
                                     border.width: root.isWhenDoneSelected(modelData.value) ? 0 : 1
