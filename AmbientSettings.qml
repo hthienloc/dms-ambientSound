@@ -61,13 +61,6 @@ PluginSettings {
             unit: "%"
             defaultValue: 75
         }
-        
-        ToggleSetting {
-            settingKey: "showHints"
-            label: "Show Hints"
-            description: "Display helpful usage tips and shortcuts at the bottom of the popout."
-            defaultValue: true
-        }
     }
 
     SettingsCard {
@@ -143,6 +136,17 @@ PluginSettings {
                     }
                 }
             }
+        }
+    }
+
+    SettingsCard {
+        SectionTitle { text: "Behavior" }
+
+        ToggleSetting {
+            settingKey: "showHints"
+            label: "Show Hints"
+            description: "Display helpful usage tips and shortcuts at the bottom of the popout."
+            defaultValue: true
         }
     }
 }
