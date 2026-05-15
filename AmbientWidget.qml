@@ -4,9 +4,13 @@ import qs.Common
 import qs.Services
 import qs.Widgets
 import qs.Modules.Plugins
+import "./components"
+
 
 PluginComponent {
     id: root
+    readonly property bool showHints: pluginData.showHints ?? true
+
 
     // Right-click action on pill
     pillRightClickAction: () => root.toggleMute()
@@ -696,22 +700,18 @@ PluginComponent {
                         }
                     }
 
-                    StyledText {
-                        text: "Right-click icon to mute/unmute"
-                        font.pixelSize: Theme.fontSizeSmall
-                        color: Theme.surfaceVariantText
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        visible: root.playingSounds.length > 0 && (pluginData.showReminderText ?? true)
-                    }
+                    HintSection {
+                        width: parent.width
+                        showHints: root.showHints && root.playingSounds.length > 0
 
-                    StyledText {
-                        text: "Scroll on a sound tile to adjust its volume"
-                        font.pixelSize: Theme.fontSizeSmall
-                        color: Theme.surfaceVariantText
-                        width: parent.width - 32
-                        wrapMode: Text.WordWrap
-                        horizontalAlignment: Text.AlignHCenter
-                        visible: root.playingSounds.length > 0 && (pluginData.showReminderText ?? true)
+                        HintItem {
+                            icon: "mouse"
+                            text: "Right-click bar icon to quickly mute/unmute."
+                        }
+                        HintItem {
+                            icon: "mouse"
+                            text: "Scroll on a sound tile to adjust its individual volume."
+                        }
                     }
                 }
             }

@@ -110,9 +110,9 @@ PluginSettings {
             }
 
             ToggleSetting {
-                settingKey: "showReminderText"
-                label: "Show Reminder Text"
-                description: "Show helper text like right-click to stop."
+                settingKey: "showHints"
+                label: "Show Hints"
+                description: "Display helpful usage tips and shortcuts at the bottom of the popout."
                 defaultValue: true
             }
 
