@@ -63,13 +63,6 @@ PluginSettings {
         }
         
         ToggleSetting {
-            settingKey: "showReminderText"
-            label: "Show Reminder Text"
-            description: "Display 'Scroll on a sound tile...' help text."
-            defaultValue: true
-        }
-
-        ToggleSetting {
             settingKey: "showHints"
             label: "Show Hints"
             description: "Display helpful usage tips and shortcuts at the bottom of the popout."
